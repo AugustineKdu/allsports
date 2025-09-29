@@ -10,7 +10,7 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   swcMinify: false,
-  outputFileTracing: false,
+  output: 'standalone',
   productionBrowserSourceMaps: false
 }
 
