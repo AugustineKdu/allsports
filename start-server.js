@@ -13,43 +13,29 @@ async function initializeDatabase() {
       process.exit(1);
     }
 
-    console.log('📊 Database URL found, creating schema...');
+    console.log('📊 DATABASE_URL:', process.env.DATABASE_URL);
 
-    // Run Prisma DB push to create tables
-    console.log('📊 Running Prisma DB push...');
-    execSync('npx prisma db push --force-reset', {
+    // Simple database push - create tables
+    console.log('📊 Creating database tables...');
+    execSync('npx prisma db push --accept-data-loss', {
       stdio: 'inherit',
-      env: process.env
+      env: process.env,
+      timeout: 60000
     });
 
     // Run seed script
-    console.log('🌱 Seeding database...');
+    console.log('🌱 Adding initial data...');
     execSync('npx prisma db seed', {
       stdio: 'inherit',
-      env: process.env
+      env: process.env,
+      timeout: 30000
     });
 
-    console.log('✅ Database initialization complete!');
+    console.log('✅ Database ready!');
 
   } catch (error) {
-    console.error('❌ Database initialization failed:', error.message);
-
-    // Try without force reset
-    try {
-      console.log('🔄 Retrying without force reset...');
-      execSync('npx prisma db push', {
-        stdio: 'inherit',
-        env: process.env
-      });
-      execSync('npx prisma db seed', {
-        stdio: 'inherit',
-        env: process.env
-      });
-      console.log('✅ Database initialization complete (retry)!');
-    } catch (retryError) {
-      console.error('❌ Database retry failed:', retryError.message);
-      console.log('⚠️  Continuing without database initialization...');
-    }
+    console.error('❌ Database setup failed:', error.message);
+    console.log('⚠️  Starting server without database setup...');
   }
 }
 
