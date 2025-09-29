@@ -6,7 +6,10 @@ options:
   startCommand: npm start
   env:
     NODE_ENV: production
-  nodeVersion: 18
+    DATABASE_URL: postgresql://username:password@host:5432/allsports
+    JWT_SECRET: your-super-secret-jwt-key-change-in-production
+    NEXT_TELEMETRY_DISABLED: 1
+  nodeVersion: 22
 context:
   git:
     url: git@github.com:AugustineKdu/allsports.git

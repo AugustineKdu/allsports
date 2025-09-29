@@ -1,0 +1,16 @@
+name: allsports
+app: next.js
+options:
+  nodeversion: "22"
+  install: npm ci
+  build: npm run build
+  env:
+    - NODE_ENV=production
+    - DATABASE_URL=postgresql://username:password@host:5432/allsports
+    - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+    - NEXT_TELEMETRY_DISABLED=1
+  buildenv: []
+context:
+  git:
+    url: https://github.com/AugustineKdu/allsports.git
+    branch: main
