@@ -8,7 +8,10 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true
-  }
+  },
+  swcMinify: false,
+  outputFileTracing: false,
+  productionBrowserSourceMaps: false
 }
 
 module.exports = nextConfig
