@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 승리한 경기 수 계산
-    const actualWinCount = completedMatches.filter(match => {
+    const actualWinCount = completedMatches.filter((match: any) => {
       const isHomeTeamMember = match.homeTeam.members.length > 0;
       if (isHomeTeamMember) {
         return (match.homeScore || 0) > (match.awayScore || 0);
