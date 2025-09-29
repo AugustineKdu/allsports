@@ -2,7 +2,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+// 프로덕션에서 JWT_SECRET이 없을 경우를 대비한 기본값
+const JWT_SECRET = process.env.JWT_SECRET || 'default-jwt-secret-for-production-sqlite';
 
 export interface TokenPayload {
   userId: string;

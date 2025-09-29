@@ -58,7 +58,9 @@ export async function GET() {
         timestamp: new Date().toISOString(),
         database: 'SQLite initialized',
         message: 'Database was created and initialized',
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
+        userCount: 0,
+        note: 'Database was empty and initialized'
       });
 
     } catch (initError) {
