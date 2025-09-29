@@ -36,6 +36,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
+# Create and set permissions for database directory
+RUN mkdir -p ./prisma && chown -R nextjs:nodejs ./prisma
+
 USER nextjs
 
 EXPOSE 3000
