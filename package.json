@@ -17,6 +17,7 @@
     "backup": "node scripts/backup.js",
     "restore": "node scripts/restore.js",
     "health-check": "node scripts/health-check.js",
+    "reset:clean": "node scripts/reset-to-clean.js",
     "deploy:cloudtype": "npm run build && npm run backup",
     "build:test": "rm -rf .next && npm run build",
     "build:docker": "docker-compose -f docker-compose.dev.yml up --build",

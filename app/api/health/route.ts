@@ -6,7 +6,7 @@ export async function GET() {
     console.log('Health check starting...');
     console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
     console.log('DATABASE_URL type:', typeof process.env.DATABASE_URL);
-    
+
     // 데이터베이스 연결 테스트
     const userCount = await prisma.user.count();
     console.log('Database connection successful, user count:', userCount);
