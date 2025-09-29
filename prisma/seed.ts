@@ -86,7 +86,7 @@ async function main() {
   }
 
   // 관리자 계정 생성 (유일한 사용자)
-  const hashedPassword = await bcrypt.hash('admin123!@#', 10);
+  const hashedPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@allsports.com' },
     update: {
@@ -106,7 +106,7 @@ async function main() {
   console.log('✅ Clean seed completed successfully!');
   console.log('👤 Only essential data created:');
   console.log(`   📍 ${regions.length} regions (서울, 경기도, 인천, 부산)`);
-  console.log('   🔐 admin@allsports.com / admin123!@# (관리자)');
+  console.log('   🔐 admin@allsports.com / admin123 (관리자)');
   console.log('');
   console.log('🎯 Ready for production - no dummy data!');
   console.log('📝 Users can now register and create their own teams/matches');

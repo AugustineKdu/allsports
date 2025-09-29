@@ -18,8 +18,13 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
-# Create database and run migrations
-RUN npx prisma migrate deploy || npx prisma db push
+# Create empty database file
+RUN mkdir -p prisma && touch prisma/dev.db
+
+# Initialize database with Prisma
+RUN npx prisma db push --force-reset || true
+
+# Seed the database
 RUN npx prisma db seed || true
 
 # Build the application
@@ -54,6 +59,9 @@ ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
 # Copy startup script
-COPY --from=builder --chown=nextjs:nodejs /app/scripts/startup.js ./scripts/startup.js
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/startup-simple.js ./scripts/startup-simple.js
 
-CMD ["sh", "-c", "node scripts/startup.js && node server.js"]
+# Make prisma directory writable
+RUN mkdir -p ./prisma && chmod 777 ./prisma
+
+CMD ["sh", "-c", "node scripts/startup-simple.js || true && node server.js"]
