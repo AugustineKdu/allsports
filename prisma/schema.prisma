@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  username      String
+  contact       String?  // 연락처 (전화번호)
+  isAdmin       Boolean  @default(false) @map("is_admin")
+  currentSport  String   @default("축구") @map("current_sport")
+  city          String   @default("서울")
+  district      String?
+  lastActiveAt  DateTime @default(now()) @map("last_active_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  ownedTeams       Team[]            @relation("TeamOwner")
+  teamMembers      TeamMember[]
+  approvedMembers  TeamMember[]      @relation("TeamMemberApprover")
+  joinRequests     TeamJoinRequest[]
+  handledRequests  TeamJoinRequest[] @relation("JoinRequestHandler")
+  createdMatches   Match[]           @relation("MatchCreator")
+  disputes         Dispute[]
+
+  @@map("users")
+}
+
+model Team {
+  id           String   @id @default(uuid())
+  name         String
+  canonicalName String  @map("canonical_name")
+  sport        String
+  city         String
+  district     String
+  ownerId      String   @map("owner_id")
+  points       Int      @default(0)
+  wins         Int      @default(0)
+  draws        Int      @default(0)
+  losses       Int      @default(0)
+  isActive     Boolean  @default(true) @map("is_active")
+  lastActiveAt DateTime @default(now()) @map("last_active_at")
+  description  String?
+  maxMembers   Int      @default(20) @map("max_members")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  owner        User                @relation("TeamOwner", fields: [ownerId], references: [id])
+  members      TeamMember[]
+  joinRequests TeamJoinRequest[]
+  homeMatches  Match[]             @relation("HomeTeam")
+  awayMatches  Match[]             @relation("AwayTeam")
+
+  @@unique([canonicalName, sport, city, district])
+  @@map("teams")
+}
+
+model TeamMember {
+  id       String   @id @default(uuid())
+  teamId   String   @map("team_id")
+  userId   String   @map("user_id")
+  status   String   @default("active")  // active, pending, rejected, left
+  role     String   @default("member")  // member, captain, owner
+  message  String?  // 가입 신청 메시지
+  joinedAt DateTime @default(now()) @map("joined_at")
+  requestedAt DateTime? @map("requested_at")
+  approvedAt  DateTime? @map("approved_at")
+  approvedBy  String?   @map("approved_by")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approver User? @relation("TeamMemberApprover", fields: [approvedBy], references: [id])
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model TeamJoinRequest {
+  id        String   @id @default(uuid())
+  teamId    String   @map("team_id")
+  userId    String   @map("user_id")
+  status    String   @default("pending")  // pending, approved, rejected
+  message   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  handledBy String?  @map("handled_by")
+  handledAt DateTime? @map("handled_at")
+
+  team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  handler User? @relation("JoinRequestHandler", fields: [handledBy], references: [id])
+
+  @@unique([teamId, userId])
+  @@map("team_join_requests")
+}
+
+model Match {
+  id             String    @id @default(uuid())
+  sport          String
+  homeTeamId     String    @map("home_team_id")
+  awayTeamId     String    @map("away_team_id")
+  matchDate      DateTime  @map("match_date")
+  matchTime      String?   @map("match_time")
+  location       String?
+  status         String    @default("proposed")
+  homeScore      Int?      @map("home_score")
+  awayScore      Int?      @map("away_score")
+  createdBy      String    @map("created_by")
+  contactInfo    String?   @map("contact_info")
+  message        String?
+  resultEnteredAt DateTime? @map("result_entered_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  homeTeam  Team     @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam  Team     @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  creator   User     @relation("MatchCreator", fields: [createdBy], references: [id])
+  disputes  Dispute[]
+
+  @@map("matches")
+}
+
+model Dispute {
+  id         String    @id @default(uuid())
+  matchId    String    @map("match_id")
+  reportedBy String    @map("reported_by")
+  reason     String
+  status     String    @default("open")
+  adminNotes String?   @map("admin_notes")
+  resolvedAt DateTime? @map("resolved_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  match    Match @relation(fields: [matchId], references: [id])
+  reporter User  @relation(fields: [reportedBy], references: [id])
+
+  @@map("disputes")
+}
+
+model Region {
+  id       Int     @id @default(autoincrement())
+  city     String
+  district String
+  isActive Boolean @default(true) @map("is_active")
+
+  @@unique([city, district])
+  @@map("regions")
+}

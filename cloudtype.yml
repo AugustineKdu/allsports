@@ -1,0 +1,14 @@
+name: allsports
+app: allsports
+options:
+  ports: 3000
+  buildCommand: npm run build
+  startCommand: npm start
+  env:
+    NODE_ENV: production
+  nodeVersion: 18
+context:
+  git:
+    url: git@github.com:AugustineKdu/allsports.git
+    ref: main
+  preset: nodejs

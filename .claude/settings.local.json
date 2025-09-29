@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:port-9000-allsporttesting-m10pz2kw69fd7f89.sel4.cloudtype.app)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:localhost)",
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npm run lint)",
+      "Bash(printf '1\\n')",
+      "Bash(chmod:*)",
+      "Bash(npm run backup:*)",
+      "Bash(npm run:*)",
+      "Bash(pkill:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

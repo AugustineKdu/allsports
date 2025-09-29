@@ -1,0 +1,17 @@
+# AllSports 자동화 스케줄
+#
+# 사용법: crontab crontab-schedule.txt
+# 또는 crontab -e 로 편집기에서 아래 내용을 추가
+
+# 매일 새벽 2시에 데이터베이스 백업
+0 2 * * * cd /path/to/allsport_update && npm run backup >> /var/log/allsports-backup.log 2>&1
+
+# 매 5분마다 헬스체크 실행
+*/5 * * * * cd /path/to/allsport_update && npm run health-check >> /var/log/allsports-health.log 2>&1
+
+# 매주 일요일 새벽 3시에 로그 파일 정리 (선택사항)
+0 3 * * 0 find /var/log -name "allsports-*.log" -mtime +30 -delete
+
+# Cloudtype 환경에서는 다음과 같이 설정:
+# 0 2 * * * cd /app && npm run backup
+# */5 * * * * cd /app && npm run health-check
