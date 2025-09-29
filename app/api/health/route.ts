@@ -5,7 +5,7 @@ export async function GET() {
   try {
     console.log('Health check starting...');
     console.log('Database type: SQLite');
-    
+
     // 데이터베이스 연결 테스트
     const userCount = await prisma.user.count();
     console.log('Database connection successful, user count:', userCount);
@@ -48,11 +48,11 @@ export async function GET() {
         started_at DATETIME,
         applied_steps_count INTEGER
       )`;
-      
+
       // 간단한 연결 테스트
       const result = await prisma.$queryRaw`SELECT 1 as test`;
       console.log('Database initialized successfully');
-      
+
       return NextResponse.json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
@@ -60,10 +60,10 @@ export async function GET() {
         message: 'Database was created and initialized',
         environment: process.env.NODE_ENV || 'development'
       });
-      
+
     } catch (initError) {
       console.error('Database initialization failed:', initError);
-      
+
       const errorStatus = {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
