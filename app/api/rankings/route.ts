@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 순위 추가
-    const rankedTeams = rankings.map((team, index) => ({
+    const rankedTeams = rankings.map((team: any, index) => ({
       ...team,
       rank: index + 1
     }));
