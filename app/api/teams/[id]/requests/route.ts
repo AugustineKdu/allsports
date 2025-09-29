@@ -137,7 +137,7 @@ export async function POST(
       }
 
       // 트랜잭션으로 승인 처리
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: any) => {
         // 가입 요청 승인
         await tx.teamJoinRequest.update({
           where: { id: requestId },

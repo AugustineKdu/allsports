@@ -56,7 +56,7 @@ export async function POST(
     }
 
     // 트랜잭션으로 결과 업데이트
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       // 매치 결과 저장
       await tx.match.update({
         where: { id: params.id },

@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 트랜잭션으로 팀 생성 + 멤버 추가
-    const team = await prisma.$transaction(async (tx) => {
+    const team = await prisma.$transaction(async (tx: any) => {
       // 팀 생성
       const newTeam = await tx.team.create({
         data: {
