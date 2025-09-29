@@ -6,7 +6,7 @@ options:
   startCommand: npm start
   env:
     NODE_ENV: production
-    DATABASE_URL: postgresql://root:allsports2025@allsportsdb:5432/allsportsdb
+    DATABASE_URL: postgresql://root:allsports2025@svc.sel3.cloudtype.app:30161/allsportsdb
     JWT_SECRET: your-super-secret-jwt-key-change-in-production
     NEXT_TELEMETRY_DISABLED: 1
   nodeVersion: 22
