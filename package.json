@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate && NEXT_TELEMETRY_DISABLED=1 next build --no-lint",
-    "start": "node start-server.js",
+    "build": "npx prisma generate && next build",
+    "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "db:push": "npx prisma db push",
     "db:seed": "npx prisma db seed"
   },
