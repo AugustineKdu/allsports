@@ -44,8 +44,8 @@ export async function POST(
     }
 
     // 경기 생성자, 확정자, 또는 양팀 멤버, 관리자만 결과 입력 가능
-    const isHomeTeamMember = match.homeTeam.members.some(member => member.userId === user.id);
-    const isAwayTeamMember = match.awayTeam.members.some(member => member.userId === user.id);
+    const isHomeTeamMember = match.homeTeam.members.some((member: any) => member.userId === user.id);
+    const isAwayTeamMember = match.awayTeam.members.some((member: any) => member.userId === user.id);
     const isCreator = match.creator.id === user.id;
 
     if (!isHomeTeamMember && !isAwayTeamMember && !isCreator && !user.isAdmin) {

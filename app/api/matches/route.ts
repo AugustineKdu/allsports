@@ -99,8 +99,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 홈팀 또는 어웨이팀의 멤버인지 확인 (팀 오너뿐만 아니라 모든 멤버 허용)
-    const isHomeTeamMember = homeTeam.members.some(member => member.userId === user.id);
-    const isAwayTeamMember = awayTeam.members.some(member => member.userId === user.id);
+    const isHomeTeamMember = homeTeam.members.some((member: any) => member.userId === user.id);
+    const isAwayTeamMember = awayTeam.members.some((member: any) => member.userId === user.id);
 
     if (!isHomeTeamMember && !isAwayTeamMember && !user.isAdmin) {
       return NextResponse.json(
