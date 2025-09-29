@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "npx prisma generate && NEXT_TELEMETRY_DISABLED=1 next build --no-lint",
     "build:full": "npx prisma generate && npx prisma db push && npx prisma db seed && NEXT_TELEMETRY_DISABLED=1 next build --no-lint",
-    "start": "node scripts/init-db.js && next start",
+    "start": "node start-server.js",
     "start:dev": "next start",
     "db:setup": "npx prisma db push && npx prisma db seed",
     "init-db": "node scripts/init-db.js",
