@@ -18,6 +18,10 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
+# Create database and run migrations
+RUN npx prisma migrate deploy || npx prisma db push
+RUN npx prisma db seed || true
+
 # Build the application
 RUN npm run build
 
@@ -36,6 +40,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
+# Copy the database file created during build
+COPY --from=builder --chown=nextjs:nodejs /app/prisma/dev.db ./prisma/dev.db || true
+
 # Create and set permissions for database directory
 RUN mkdir -p ./prisma && chown -R nextjs:nodejs ./prisma
 
@@ -46,4 +53,7 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js"]
+# Copy startup script
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/startup.js ./scripts/startup.js
+
+CMD ["sh", "-c", "node scripts/startup.js && node server.js"]
