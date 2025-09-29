@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate && npx prisma db push && npx prisma db seed && NEXT_TELEMETRY_DISABLED=1 next build --no-lint",
-    "start": "next start",
+    "build": "npx prisma generate && NEXT_TELEMETRY_DISABLED=1 next build --no-lint",
+    "build:full": "npx prisma generate && npx prisma db push && npx prisma db seed && NEXT_TELEMETRY_DISABLED=1 next build --no-lint",
+    "start": "npm run db:setup && next start",
+    "start:dev": "next start",
+    "db:setup": "npx prisma db push && npx prisma db seed",
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
