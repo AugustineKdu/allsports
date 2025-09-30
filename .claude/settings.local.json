@@ -31,7 +31,9 @@
       "Bash(npm:*)",
       "Bash(./setup-postgres.sh:*)",
       "Bash(DATABASE_URL=\"postgresql://root:allsports2025@svc.sel3.cloudtype.app:30161/allsportsdb\" npm run test-db)",
-      "WebFetch(domain:docs.cloudtype.io)"
+      "WebFetch(domain:docs.cloudtype.io)",
+      "Bash(vercel link:*)",
+      "Bash(npx prisma db seed:*)"
     ],
     "deny": [],
     "ask": []
