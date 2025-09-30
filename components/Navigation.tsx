@@ -131,8 +131,8 @@ export default function Navigation() {
               </div>
             )}
 
-            {/* 모바일 메뉴 버튼 */}
-            <button
+            {/* 모바일 메뉴 버튼 - 주석처리 (하단 탭바로 대체) */}
+            {/* <button
               className="ml-4 md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
@@ -149,12 +149,12 @@ export default function Navigation() {
                   d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
-            </button>
+            </button> */}
           </div>
         </div>
 
-        {/* 모바일 메뉴 */}
-        {isMenuOpen && (
+        {/* 모바일 메뉴 - 주석처리 (하단 탭바로 대체) */}
+        {/* {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
               <Link
@@ -180,7 +180,7 @@ export default function Navigation() {
               </Link>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </nav>
   );
