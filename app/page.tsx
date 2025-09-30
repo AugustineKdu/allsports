@@ -79,16 +79,16 @@ export default function HomePage() {
               랭킹과 기록이 만들어가는<br />나와 팀의 성장스토리
             </p>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-xl p-6 mb-8 max-w-2xl mx-auto shadow-lg">
               <div className="text-3xl mb-3">⚡</div>
-              <p className="text-xl font-semibold mb-2 text-gray-900">전국 아마추어 스포츠의 새로운 시작</p>
-              <p className="text-gray-600 mb-3">
+              <p className="text-xl font-semibold mb-2 text-white">전국 아마추어 스포츠의 새로운 시작</p>
+              <p className="text-blue-100 mb-3">
                 지역별 팀 매칭부터 전국 랭킹까지! 현재 베타 버전에서는 축구와 풋살을 지원하며, 정식 서비스 출시 시 다양한 스포츠 종목이 추가될 예정입니다.
               </p>
-              <p className="text-lg font-medium text-blue-600">
+              <p className="text-lg font-medium text-yellow-300">
                 🎯 팀을 만들고, 경기를 하고, 랭킹을 올려보세요!
               </p>
-              <div className="mt-3 text-xs text-gray-600">
+              <div className="mt-3 text-xs text-blue-200">
                 <span className="bg-yellow-400/20 px-2 py-1 rounded">BETA</span>
                 <span className="ml-2">⚽ 축구 · 풋살 지원</span>
               </div>
