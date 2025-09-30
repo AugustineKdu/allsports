@@ -59,9 +59,9 @@ export default function HomePage() {
 
       {/* 히어로 섹션 */}
       {!user && (
-        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white relative overflow-hidden">
+        <div className="bg-white text-gray-900 relative overflow-hidden">
           {/* 배경 장식 */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-5">
             <div className="absolute top-10 left-10 text-6xl">🏆</div>
             <div className="absolute top-20 right-20 text-5xl">⚽</div>
             <div className="absolute bottom-20 left-1/4 text-5xl">🥅</div>
@@ -69,26 +69,26 @@ export default function HomePage() {
 
           <div className="max-w-7xl mx-auto px-4 py-20 text-center relative">
             <div className="text-5xl mb-4">🏆</div>
-            <h1 className="text-5xl font-bold mb-3">
+            <h1 className="text-5xl font-bold mb-3 text-blue-600">
               AllSports
             </h1>
-            <p className="text-2xl font-semibold mb-3 text-blue-100">
+            <p className="text-2xl font-semibold mb-3 text-gray-900">
               지역을 대표하고 전국을 제패하라
             </p>
-            <p className="text-lg mb-4 text-blue-200">
+            <p className="text-lg mb-4 text-gray-600">
               랭킹과 기록이 만들어가는<br />나와 팀의 성장스토리
             </p>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8 max-w-2xl mx-auto">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
               <div className="text-3xl mb-3">⚡</div>
-              <p className="text-xl font-semibold mb-2">전국 아마추어 스포츠의 새로운 시작</p>
-              <p className="text-blue-100 mb-3">
+              <p className="text-xl font-semibold mb-2 text-gray-900">전국 아마추어 스포츠의 새로운 시작</p>
+              <p className="text-gray-600 mb-3">
                 지역별 팀 매칭부터 전국 랭킹까지! 현재 베타 버전에서는 축구와 풋살을 지원하며, 정식 서비스 출시 시 다양한 스포츠 종목이 추가될 예정입니다.
               </p>
-              <p className="text-lg font-medium text-yellow-300">
+              <p className="text-lg font-medium text-blue-600">
                 🎯 팀을 만들고, 경기를 하고, 랭킹을 올려보세요!
               </p>
-              <div className="mt-3 text-xs text-blue-200">
+              <div className="mt-3 text-xs text-gray-600">
                 <span className="bg-yellow-400/20 px-2 py-1 rounded">BETA</span>
                 <span className="ml-2">⚽ 축구 · 풋살 지원</span>
               </div>
@@ -97,13 +97,13 @@ export default function HomePage() {
             <div className="space-x-4 mb-6">
               <Link
                 href="/register"
-                className="inline-block bg-yellow-400 text-blue-900 px-10 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition-all hover:scale-105 shadow-lg"
+                className="inline-block bg-blue-600 text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all hover:scale-105 shadow-lg"
               >
                 🚀 전국 제패 시작하기
               </Link>
               <Link
                 href="/login"
-                className="inline-block border-2 border-white text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-600 transition-all hover:scale-105"
+                className="inline-block border-2 border-blue-600 text-blue-600 px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-600 hover:text-white transition-all hover:scale-105"
               >
                 로그인
               </Link>
@@ -112,18 +112,18 @@ export default function HomePage() {
             <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto text-center">
               <div>
                 <div className="text-2xl mb-2">🏆</div>
-                <p className="text-sm font-semibold">전국을 향한 도전</p>
-                <p className="text-xs text-blue-200">지역을 대표하는 팀이 되어<br />전국 랭킹의 정상에 오르세요</p>
+                <p className="text-sm font-semibold text-gray-900">전국을 향한 도전</p>
+                <p className="text-xs text-gray-600">지역을 대표하는 팀이 되어<br />전국 랭킹의 정상에 오르세요</p>
               </div>
               <div>
                 <div className="text-2xl mb-2">⚽</div>
-                <p className="text-sm font-semibold">팀 매칭</p>
-                <p className="text-xs text-blue-200">지역부터 전국까지<br />어디든 매칭하여 경기하세요</p>
+                <p className="text-sm font-semibold text-gray-900">팀 매칭</p>
+                <p className="text-xs text-gray-600">지역부터 전국까지<br />어디든 매칭하여 경기하세요</p>
               </div>
               <div>
                 <div className="text-2xl mb-2">📊</div>
-                <p className="text-sm font-semibold">성장 기록</p>
-                <p className="text-xs text-blue-200">모든 경기를 기록으로 남겨<br />팀의 성장 스토리를 만드세요</p>
+                <p className="text-sm font-semibold text-gray-900">성장 기록</p>
+                <p className="text-xs text-gray-600">모든 경기를 기록으로 남겨<br />팀의 성장 스토리를 만드세요</p>
               </div>
             </div>
           </div>
