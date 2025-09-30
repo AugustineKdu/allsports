@@ -59,27 +59,68 @@ export default function HomePage() {
 
       {/* 히어로 섹션 */}
       {!user && (
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-            <h1 className="text-4xl font-bold mb-4">
-              아마추어 스포츠 매칭 플랫폼
+        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white relative overflow-hidden">
+          {/* 배경 장식 */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 text-6xl">🏆</div>
+            <div className="absolute top-20 right-20 text-5xl">⚽</div>
+            <div className="absolute bottom-20 left-1/4 text-5xl">🥅</div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 py-20 text-center relative">
+            <div className="text-5xl mb-4">🏆</div>
+            <h1 className="text-5xl font-bold mb-3">
+              AllSports
             </h1>
-            <p className="text-xl mb-8 text-blue-100">
-              축구와 풋살 팀을 만들고, 경기를 주선하고, 랭킹을 확인하세요
+            <p className="text-2xl font-semibold mb-3 text-blue-100">
+              지역을 대표하고 전국을 제패하라
             </p>
-            <div className="space-x-4">
+            <p className="text-lg mb-4 text-blue-200">
+              랭킹과 기록이 만들어가는<br />나와 팀의 성장스토리
+            </p>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8 max-w-2xl mx-auto">
+              <div className="text-3xl mb-3">⚡</div>
+              <p className="text-xl font-semibold mb-2">전국 아마추어 스포츠의 새로운 시작</p>
+              <p className="text-blue-100 mb-3">
+                지역별 팀 매칭부터 전국 랭킹까지! 축구와 풋살을 시작으로 다양한 스포츠 종목을 지원합니다.
+              </p>
+              <p className="text-lg font-medium text-yellow-300">
+                🎯 팀을 만들고, 경기를 하고, 랭킹을 올려보세요!
+              </p>
+            </div>
+
+            <div className="space-x-4 mb-6">
               <Link
                 href="/register"
-                className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                className="inline-block bg-yellow-400 text-blue-900 px-10 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition-all hover:scale-105 shadow-lg"
               >
-                시작하기
+                🚀 전국 제패 시작하기
               </Link>
               <Link
                 href="/login"
-                className="inline-block border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-blue-600 transition-colors"
+                className="inline-block border-2 border-white text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-600 transition-all hover:scale-105"
               >
                 로그인
               </Link>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto text-center">
+              <div>
+                <div className="text-2xl mb-2">🏆</div>
+                <p className="text-sm font-semibold">전국을 향한 도전</p>
+                <p className="text-xs text-blue-200">지역을 대표하는 팀이 되어<br />전국 랭킹의 정상에 오르세요</p>
+              </div>
+              <div>
+                <div className="text-2xl mb-2">⚽</div>
+                <p className="text-sm font-semibold">팀 매칭</p>
+                <p className="text-xs text-blue-200">지역부터 전국까지<br />어디든 매칭하여 경기하세요</p>
+              </div>
+              <div>
+                <div className="text-2xl mb-2">📊</div>
+                <p className="text-sm font-semibold">성장 기록</p>
+                <p className="text-xs text-blue-200">모든 경기를 기록으로 남겨<br />팀의 성장 스토리를 만드세요</p>
+              </div>
             </div>
           </div>
         </div>
@@ -209,29 +250,61 @@ export default function HomePage() {
               </div>
             )}
 
+            {/* 기능 소개 섹션 */}
+            {!user && (
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-center mb-8">
+                  AllSports의 핵심 기능
+                </h2>
+                <p className="text-center text-gray-600 mb-8">
+                  지역부터 전국까지, 팀의 성장을 지원합니다
+                </p>
+              </div>
+            )}
+
             {/* 빠른 메뉴 */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link href="/teams" className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
+              <Link href={user ? "/teams" : "/register"} className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
                 <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">👥</div>
-                <div className="font-medium text-gray-900">팀 관리</div>
-                <div className="text-sm text-gray-500 mt-1">팀 생성 및 관리</div>
+                <div className="font-medium text-gray-900">팀 만들기</div>
+                <div className="text-sm text-gray-500 mt-1">지역을 대표하는 팀을 만들고 멤버를 모집하세요</div>
+                {!user && <div className="text-xs text-blue-600 mt-2 font-medium">회원가입 →</div>}
               </Link>
-              <Link href="/matches" className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">⚽</div>
-                <div className="font-medium text-gray-900">시합 관리</div>
-                <div className="text-sm text-gray-500 mt-1">경기 생성 및 결과</div>
+              <Link href={user ? "/matches" : "/login"} className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
+                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">📅</div>
+                <div className="font-medium text-gray-900">전국 매칭</div>
+                <div className="text-sm text-gray-500 mt-1">지역부터 전국까지 어디든 팀과 매칭하여 경기하세요</div>
+                {!user && <div className="text-xs text-blue-600 mt-2 font-medium">로그인 →</div>}
               </Link>
               <Link href="/rankings" className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
                 <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">🏆</div>
-                <div className="font-medium text-gray-900">랭킹</div>
-                <div className="text-sm text-gray-500 mt-1">전국/지역 순위</div>
+                <div className="font-medium text-gray-900">전국 랭킹</div>
+                <div className="text-sm text-gray-500 mt-1">지역/전국 랭킹에서 팀의 실력을 확인하고 전국 제패에 도전하세요</div>
               </Link>
-              <Link href="/profile" className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">👤</div>
-                <div className="font-medium text-gray-900">마이페이지</div>
-                <div className="text-sm text-gray-500 mt-1">개인 정보 관리</div>
+              <Link href={user ? "/profile" : "/register"} className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
+                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">🎯</div>
+                <div className="font-medium text-gray-900">성장 기록</div>
+                <div className="text-sm text-gray-500 mt-1">모든 경기와 승부를 기록으로 남겨 팀의 성장 스토리를 만들어가세요</div>
               </Link>
             </div>
+
+            {/* CTA 섹션 */}
+            {!user && (
+              <div className="mt-12 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-10 text-center text-white">
+                <h2 className="text-3xl font-bold mb-3">🏆 전국 제패의 꿈</h2>
+                <h3 className="text-2xl font-semibold mb-4">지금 시작하세요!</h3>
+                <p className="text-lg mb-6 text-blue-100">
+                  지역을 대표하는 팀이 되어 전국 랭킹의 정상에 오르는<br />
+                  나와 팀의 성장 스토리를 만들어보세요.
+                </p>
+                <Link
+                  href="/register"
+                  className="inline-block bg-yellow-400 text-blue-900 px-12 py-4 rounded-xl font-bold text-xl hover:bg-yellow-300 transition-all hover:scale-105 shadow-lg"
+                >
+                  🚀 전국 제패 시작하기
+                </Link>
+              </div>
+            )}
           </>
         )}
       </div>
