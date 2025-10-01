@@ -12,10 +12,10 @@ export default function MobileNav() {
   if (!user) return null;
 
   const navItems = [
-    { href: '/', label: '홈' },
-    { href: '/teams', label: '팀' },
-    { href: '/matches', label: '시합' },
-    { href: '/rankings', label: '랭킹' },
+    { href: '/', label: 'Home' },
+    { href: '/teams', label: 'Teams' },
+    { href: '/matches', label: 'Matches' },
+    { href: '/rankings', label: 'Rankings' },
   ];
 
   return (

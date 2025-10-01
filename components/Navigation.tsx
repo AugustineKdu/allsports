@@ -33,19 +33,19 @@ export default function Navigation() {
                 href="/teams"
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                팀
+                Teams
               </Link>
               <Link
                 href="/matches"
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                시합
+                Matches
               </Link>
               <Link
                 href="/rankings"
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                랭킹
+                Rankings
               </Link>
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function Navigation() {
                     <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
                       <p className="font-medium text-gray-900">{user.username}</p>
                       <p className="text-xs">{user.city} {user.district}</p>
-                      <p className="text-xs">선호 스포츠: {user.currentSport}</p>
+                      <p className="text-xs">Sport: {user.currentSport}</p>
                     </div>
 
                     <Link
@@ -95,7 +95,7 @@ export default function Navigation() {
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      마이페이지
+                      Profile
                     </Link>
 
                     {user.isAdmin && (
@@ -104,7 +104,7 @@ export default function Navigation() {
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        관리자 페이지
+                        Admin
                       </Link>
                     )}
 
@@ -112,7 +112,7 @@ export default function Navigation() {
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      로그아웃
+                      Logout
                     </button>
                   </div>
                 )}
@@ -123,13 +123,13 @@ export default function Navigation() {
                   href="/login"
                   className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
-                  로그인
+                  Login
                 </Link>
                 <Link
                   href="/register"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
-                  회원가입
+                  Sign Up
                 </Link>
               </div>
             )}
