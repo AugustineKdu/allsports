@@ -20,18 +20,25 @@ interface RankedTeam {
 }
 
 export default function RankingsPage() {
+  const { user } = useAuth();
   const [rankings, setRankings] = useState<RankedTeam[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedSport, setSelectedSport] = useState('축구');
+  const [selectedSport, setSelectedSport] = useState(user?.currentSport || '축구');
   const [selectedScope, setSelectedScope] = useState('national');
-  const [selectedCity, setSelectedCity] = useState('서울');
+  const [selectedCity, setSelectedCity] = useState(user?.city || '서울');
   const [selectedDistrict, setSelectedDistrict] = useState('');
-  const { user } = useAuth();
 
   const districts: Record<string, string[]> = {
     '서울': ['강남구', '강동구', '강서구', '관악구', '송파구', '서초구', '마포구', '용산구'],
     '경기도': ['수원시', '성남시', '고양시', '용인시', '부천시', '안양시', '안산시', '화성시']
   };
+
+  useEffect(() => {
+    if (user) {
+      setSelectedSport(user.currentSport);
+      setSelectedCity(user.city);
+    }
+  }, [user]);
 
   useEffect(() => {
     loadRankings();

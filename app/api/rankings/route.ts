@@ -32,13 +32,8 @@ export async function GET(request: NextRequest) {
         break;
     }
 
-    const rankings = await prisma.team.findMany({
+    const teams = await prisma.team.findMany({
       where,
-      orderBy: [
-        { points: 'desc' },
-        { wins: 'desc' },
-        { draws: 'desc' }
-      ],
       include: {
         _count: {
           select: { members: true }
@@ -46,11 +41,28 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // 순위 추가
-    const rankedTeams = rankings.map((team: any, index: number) => ({
-      ...team,
-      rank: index + 1
-    }));
+    // 승률 계산 및 정렬
+    const rankedTeams = teams
+      .map((team: any) => {
+        const totalGames = team.wins + team.draws + team.losses;
+        const winRate = totalGames > 0 ? team.wins / totalGames : 0;
+        return {
+          ...team,
+          winRate
+        };
+      })
+      .sort((a, b) => {
+        // 1순위: 포인트
+        if (b.points !== a.points) {
+          return b.points - a.points;
+        }
+        // 2순위: 승률
+        return b.winRate - a.winRate;
+      })
+      .map((team: any, index: number) => ({
+        ...team,
+        rank: index + 1
+      }));
 
     return NextResponse.json(rankedTeams);
   } catch (error) {

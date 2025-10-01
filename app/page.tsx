@@ -5,7 +5,6 @@ import { useAuth } from '@/components/AuthContext';
 import Link from 'next/link';
 
 export default function HomePage() {
-  const [currentSport, setCurrentSport] = useState('축구');
   const [myTeams, setMyTeams] = useState([]);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [rankings, setRankings] = useState([]);
@@ -14,21 +13,22 @@ export default function HomePage() {
 
   useEffect(() => {
     loadData();
-  }, [currentSport, user]);
+  }, [user]);
 
   const loadData = async () => {
     setIsLoading(true);
     try {
-      // 랭킹 데이터 로드
-      const rankingsResponse = await fetch(`/api/rankings?sport=${currentSport}&scope=city&city=${user?.city || '서울'}`);
-      if (rankingsResponse.ok) {
-        const rankingsData = await rankingsResponse.json();
-        setRankings(rankingsData.slice(0, 5)); // TOP 5만 표시
-      }
-
       // 사용자가 로그인한 경우 개인 데이터 로드
       if (user) {
         const token = localStorage.getItem('token');
+        const currentSport = user.currentSport;
+
+        // 랭킹 데이터 로드 (user의 도시 기반)
+        const rankingsResponse = await fetch(`/api/rankings?sport=${currentSport}&scope=city&city=${user.city}`);
+        if (rankingsResponse.ok) {
+          const rankingsData = await rankingsResponse.json();
+          setRankings(rankingsData.slice(0, 5)); // TOP 5만 표시
+        }
 
         // 내 팀 데이터 로드
         const teamsResponse = await fetch(`/api/teams?sport=${currentSport}&city=${user.city}`, {
@@ -123,32 +123,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 스포츠 전환 토글 */}
-      <div className="flex justify-center p-4 bg-white border-b">
-        <div className="flex gap-2">
-          <button
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-              currentSport === '축구'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            onClick={() => setCurrentSport('축구')}
-          >
-            ⚽ 축구
-          </button>
-          <button
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-              currentSport === '풋살'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            onClick={() => setCurrentSport('풋살')}
-          >
-            ⚽ 풋살
-          </button>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
@@ -218,7 +192,7 @@ export default function HomePage() {
                 {/* 지역 랭킹 TOP 5 */}
                 <div className="bg-white rounded-lg shadow p-6">
                   <h2 className="text-xl font-semibold mb-4">
-                    {user?.city || '서울'} TOP 5
+                    {user.city} TOP 5
                   </h2>
                   {rankings.length > 0 ? (
                     <div className="space-y-2">

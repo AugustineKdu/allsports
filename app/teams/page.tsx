@@ -34,14 +34,22 @@ interface Team {
 }
 
 export default function TeamsPage() {
+  const { user } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
   const [myTeams, setMyTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedSport, setSelectedSport] = useState('축구');
-  const [selectedCity, setSelectedCity] = useState('서울');
+  const [selectedSport, setSelectedSport] = useState(user?.currentSport || '축구');
+  const [selectedCity, setSelectedCity] = useState(user?.city || '서울');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const { user } = useAuth();
+
+  // user 정보가 로드되면 필터 초기화
+  useEffect(() => {
+    if (user) {
+      setSelectedSport(user.currentSport);
+      setSelectedCity(user.city);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {

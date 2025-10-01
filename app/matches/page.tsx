@@ -30,16 +30,22 @@ interface Match {
 }
 
 export default function MatchesPage() {
+  const { user } = useAuth();
   const [myMatches, setMyMatches] = useState<Match[]>([]);
   const [otherMatches, setOtherMatches] = useState<Match[]>([]);
   const [filteredOtherMatches, setFilteredOtherMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedSport, setSelectedSport] = useState('축구');
+  const [selectedSport, setSelectedSport] = useState(user?.currentSport || '축구');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const matchesPerPage = 10;
-  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      setSelectedSport(user.currentSport);
+    }
+  }, [user]);
 
   useEffect(() => {
     loadMatches();
