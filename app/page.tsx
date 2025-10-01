@@ -31,20 +31,30 @@ export default function HomePage() {
         }
 
         // 내 팀 데이터 로드
-        const teamsResponse = await fetch(`/api/teams?sport=${currentSport}&city=${user.city}`, {
+        const teamsResponse = await fetch(`/api/teams?sport=${currentSport}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (teamsResponse.ok) {
           const teamsData = await teamsResponse.json();
-          // 사용자가 멤버로 속한 팀들을 필터링해야 함 (임시로 모든 팀 표시)
-          setMyTeams(teamsData.slice(0, 3));
+          // 사용자가 멤버로 속한 팀들만 필터링
+          const userTeams = teamsData.filter((team: any) =>
+            team.members.some((member: any) => member.user.id === user.id)
+          );
+          setMyTeams(userTeams.slice(0, 3));
         }
 
-        // 예정된 경기 데이터 로드
-        const matchesResponse = await fetch(`/api/matches?sport=${currentSport}&status=proposed`);
+        // 예정된 경기 데이터 로드 (내 팀이 참여한 경기만)
+        const matchesResponse = await fetch(`/api/matches?sport=${currentSport}`);
         if (matchesResponse.ok) {
           const matchesData = await matchesResponse.json();
-          setUpcomingMatches(matchesData.slice(0, 3));
+          // 내 팀이 참여한 경기만 필터링 (제안됨 or 확정됨)
+          const myMatches = matchesData.filter((match: any) =>
+            (match.status === 'proposed' || match.status === 'confirmed') &&
+            (match.homeTeam.owner?.id === user.id ||
+             match.awayTeam.owner?.id === user.id ||
+             match.creator.id === user.id)
+          );
+          setUpcomingMatches(myMatches.slice(0, 3));
         }
       }
     } catch (error) {
@@ -66,10 +76,10 @@ export default function HomePage() {
               AllSports
             </h1>
             <p className="text-xl md:text-2xl font-semibold mb-3 text-gray-900 break-keep">
-              지역을 대표하고 전국을 제패하라
+              전국을 향한 도전
             </p>
             <p className="text-base md:text-lg mb-4 text-gray-600 break-keep">
-              랭킹과 기록이 만들어가는<br />나와 팀의 성장스토리
+              지역을 대표하는 팀이 되어<br />전국 랭킹의 정상에 오르세요
             </p>
 
             <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-xl p-6 mb-8 max-w-2xl mx-auto shadow-lg">
@@ -132,20 +142,58 @@ export default function HomePage() {
           <>
             {/* 사용자별 대시보드 */}
             {user && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <>
+                {/* AllSports 소개 */}
+                <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-xl p-6 mb-8 text-white shadow-lg">
+                  <div className="text-center">
+                    <div className="text-4xl mb-3">🏆</div>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-3 break-keep">
+                      AllSports와 함께하는 전국 제패의 여정
+                    </h2>
+                    <p className="text-base md:text-lg text-blue-100 mb-4 break-keep">
+                      지역을 대표하는 팀이 되어 전국 랭킹의 정상을 향해 도전하세요.<br />
+                      모든 경기를 기록으로 남기고, 팀의 성장 스토리를 만들어갑니다.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-4 text-sm md:text-base">
+                      <div className="bg-white/10 px-4 py-2 rounded-lg">
+                        <span className="font-semibold">⚽</span> 지역별 팀 매칭
+                      </div>
+                      <div className="bg-white/10 px-4 py-2 rounded-lg">
+                        <span className="font-semibold">📊</span> 실시간 랭킹 업데이트
+                      </div>
+                      <div className="bg-white/10 px-4 py-2 rounded-lg">
+                        <span className="font-semibold">🎯</span> 성장 기록 관리
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {/* 내 팀 정보 */}
                 <div className="bg-white rounded-lg shadow p-6">
                   <h2 className="text-xl font-semibold mb-4">내 팀</h2>
                   {myTeams.length > 0 ? (
-                    <div className="space-y-3">
-                      {myTeams.map((team: any) => (
-                        <div key={team.id} className="border-l-4 border-blue-500 pl-3">
-                          <p className="font-medium">{team.name}</p>
-                          <p className="text-sm text-gray-600">{team.city} {team.district}</p>
-                          <p className="text-sm text-gray-500">포인트: {team.points}</p>
-                        </div>
-                      ))}
-                    </div>
+                    <>
+                      <div className="space-y-3">
+                        {myTeams.map((team: any) => (
+                          <Link
+                            key={team.id}
+                            href={`/teams/${team.id}`}
+                            className="block border-l-4 border-blue-500 pl-3 hover:bg-gray-50 py-1 -ml-3 px-3 rounded-r transition-colors"
+                          >
+                            <p className="font-medium">{team.name}</p>
+                            <p className="text-sm text-gray-600">{team.city} {team.district}</p>
+                            <p className="text-sm text-gray-500">포인트: {team.points}</p>
+                          </Link>
+                        ))}
+                      </div>
+                      <Link
+                        href="/teams"
+                        className="block text-center text-blue-600 hover:text-blue-800 text-sm font-medium mt-3"
+                      >
+                        전체 팀 보기 →
+                      </Link>
+                    </>
                   ) : (
                     <div className="text-center">
                       <p className="text-gray-500 mb-3">아직 가입한 팀이 없습니다</p>
@@ -164,17 +212,44 @@ export default function HomePage() {
                   <h2 className="text-xl font-semibold mb-4">예정된 경기</h2>
                   {upcomingMatches.length > 0 ? (
                     <div className="space-y-3">
-                      {upcomingMatches.map((match: any) => (
-                        <div key={match.id} className="border border-gray-200 rounded p-3">
-                          <p className="font-medium text-sm">
-                            {match.homeTeam.name} vs {match.awayTeam.name}
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            {new Date(match.matchDate).toLocaleDateString()}
-                          </p>
-                          <p className="text-xs text-gray-500">{match.location}</p>
-                        </div>
-                      ))}
+                      {upcomingMatches.map((match: any) => {
+                        const isAwaitingResponse = match.status === 'proposed' &&
+                          match.creator.id !== user.id &&
+                          (match.homeTeam.owner?.id === user.id || match.awayTeam.owner?.id === user.id);
+
+                        return (
+                          <Link
+                            key={match.id}
+                            href={`/matches/${match.id}`}
+                            className="block border border-gray-200 rounded p-3 hover:border-blue-300 hover:shadow-sm transition-all"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <p className="font-medium text-sm">
+                                {match.homeTeam.name} vs {match.awayTeam.name}
+                              </p>
+                              {isAwaitingResponse ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  ⚡ 응답 필요
+                                </span>
+                              ) : match.status === 'confirmed' ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  ✅ 확정됨
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  ⏳ 대기 중
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              📅 {new Date(match.matchDate).toLocaleDateString()}
+                            </p>
+                            {match.location && (
+                              <p className="text-xs text-gray-500">📍 {match.location}</p>
+                            )}
+                          </Link>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="text-center">
@@ -187,6 +262,12 @@ export default function HomePage() {
                       </Link>
                     </div>
                   )}
+                  <Link
+                    href="/matches"
+                    className="block text-center text-blue-600 hover:text-blue-800 text-sm font-medium mt-3"
+                  >
+                    전체 경기 보기 →
+                  </Link>
                 </div>
 
                 {/* 지역 랭킹 TOP 5 */}
@@ -219,6 +300,7 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
+              </>
             )}
 
             {/* 기능 소개 섹션 */}
@@ -276,6 +358,53 @@ export default function HomePage() {
                 </Link>
               </div>
             )}
+
+            {/* 베타 서비스 안내 */}
+            <div className="mt-16 mb-8 bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 border-2 border-yellow-300 rounded-2xl p-8 text-center shadow-lg">
+              <div className="text-4xl mb-4">🚀</div>
+              <div className="inline-block bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full text-sm font-bold mb-4">
+                BETA SERVICE
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 break-keep">
+                현재 베타 서비스 운영중입니다
+              </h3>
+              <p className="text-base md:text-lg text-gray-700 mb-6 break-keep">
+                AllSports는 더 나은 서비스를 위해 여러분의 소중한 의견을 기다립니다.<br />
+                불편사항, 개선사항, 추가 기능 제안 등 무엇이든 환영합니다!
+              </p>
+
+              <div className="max-w-2xl mx-auto bg-white rounded-xl p-6 shadow-md">
+                <h4 className="text-lg font-bold text-gray-900 mb-4">📞 문의 및 피드백</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center space-x-3 text-gray-700">
+                    <span className="text-xl">📧</span>
+                    <span className="font-medium">담당자 이메일:</span>
+                    <a
+                      href="mailto:contact@allsports.com"
+                      className="text-blue-600 hover:text-blue-800 font-semibold hover:underline"
+                    >
+                      contact@allsports.com
+                    </a>
+                  </div>
+                  <div className="flex items-center justify-center space-x-3 text-gray-700">
+                    <span className="text-xl">💬</span>
+                    <span className="font-medium">카카오톡 오픈채팅:</span>
+                    <a
+                      href="https://open.kakao.com/o/YOUR_CHAT_LINK"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 font-semibold hover:underline"
+                    >
+                      오픈채팅방 참여하기 →
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 mt-6 break-keep">
+                여러분의 피드백으로 AllSports가 성장합니다. 감사합니다! 🙏
+              </p>
+            </div>
           </>
         )}
       </div>

@@ -35,69 +35,91 @@ interface Team {
 
 export default function TeamsPage() {
   const { user } = useAuth();
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [districtTeams, setDistrictTeams] = useState<Team[]>([]);
+  const [cityTeams, setCityTeams] = useState<Team[]>([]);
   const [myTeams, setMyTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedSport, setSelectedSport] = useState(user?.currentSport || '축구');
-  const [selectedCity, setSelectedCity] = useState(user?.city || '서울');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [activeTab, setActiveTab] = useState<'district' | 'city'>('district');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // user 정보가 로드되면 필터 초기화
   useEffect(() => {
     if (user) {
-      setSelectedSport(user.currentSport);
-      setSelectedCity(user.city);
+      loadAllTeams();
     }
   }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      loadTeams();
-    }
-  }, [selectedSport, selectedCity, selectedDistrict, user]);
+  const loadAllTeams = async () => {
+    if (!user) return;
 
-  const loadTeams = async () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const params = new URLSearchParams({
-        sport: selectedSport,
-        city: selectedCity
+      const sport = user.currentSport;
+      const city = user.city;
+      const district = user.district;
+
+      // 1. 구/군 팀 로드
+      const districtParams = new URLSearchParams({
+        sport,
+        city,
+        district
       });
-
-      if (selectedDistrict) {
-        params.append('district', selectedDistrict);
-      }
-
-      const response = await fetch(`/api/teams?${params}`, {
+      const districtResponse = await fetch(`/api/teams?${districtParams}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      if (response.ok) {
-        const allTeams = await response.json();
+      // 2. 시/도 팀 로드
+      const cityParams = new URLSearchParams({
+        sport,
+        city
+      });
+      const cityResponse = await fetch(`/api/teams?${cityParams}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-        // 내 팀과 다른 팀 분리 및 정렬
-        const userTeams = allTeams.filter((team: Team) =>
-          team.members.some(member => member.user.id === user?.id)
+      // 내 팀 분리 함수
+      const separateMyTeams = (teams: Team[]) => {
+        const userTeams = teams.filter((team: Team) =>
+          team.members.some(member => member.user.id === user.id)
         ).sort((a: Team, b: Team) => {
-          // 오너인 팀을 맨 위에 표시
-          const aIsOwner = a.owner.id === user?.id;
-          const bIsOwner = b.owner.id === user?.id;
-
+          const aIsOwner = a.owner.id === user.id;
+          const bIsOwner = b.owner.id === user.id;
           if (aIsOwner && !bIsOwner) return -1;
           if (!aIsOwner && bIsOwner) return 1;
-
-          // 같은 권한이면 포인트 순으로 정렬
           return b.points - a.points;
         });
 
-        const otherTeams = allTeams.filter((team: Team) =>
-          !team.members.some(member => member.user.id === user?.id)
+        const otherTeams = teams.filter((team: Team) =>
+          !team.members.some(member => member.user.id === user.id)
         ).sort((a: Team, b: Team) => b.points - a.points);
 
+        return { userTeams, otherTeams };
+      };
+
+      if (districtResponse.ok) {
+        const teams = await districtResponse.json();
+        const { userTeams, otherTeams } = separateMyTeams(teams);
         setMyTeams(userTeams);
-        setTeams(otherTeams);
+        setDistrictTeams(otherTeams);
+      }
+
+      if (cityResponse.ok) {
+        const teams = await cityResponse.json();
+        const { otherTeams } = separateMyTeams(teams);
+        // 사용자의 구/시를 우선으로 정렬 (같은 구/시 팀들을 먼저 보여줌)
+        const sortedTeams = otherTeams.sort((a: Team, b: Team) => {
+          const aIsUserDistrict = a.district === user.district;
+          const bIsUserDistrict = b.district === user.district;
+
+          // 같은 구/시 팀을 먼저
+          if (aIsUserDistrict && !bIsUserDistrict) return -1;
+          if (!aIsUserDistrict && bIsUserDistrict) return 1;
+
+          // 같은 조건이면 포인트순
+          return b.points - a.points;
+        });
+        setCityTeams(sortedTeams);
       }
     } catch (error) {
       console.error('팀 목록 로드 실패:', error);
@@ -119,88 +141,67 @@ export default function TeamsPage() {
     );
   }
 
+  const getCurrentTeams = () => {
+    let teams: Team[] = [];
+    switch (activeTab) {
+      case 'district':
+        teams = districtTeams;
+        break;
+      case 'city':
+        teams = cityTeams;
+        break;
+      default:
+        teams = [];
+    }
+
+    // 검색어 필터링
+    if (searchQuery.trim()) {
+      return teams.filter(team =>
+        team.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return teams;
+  };
+
+  const getCurrentTitle = () => {
+    const currentTeams = getCurrentTeams();
+    const baseCount = `${currentTeams.length}개`;
+
+    if (searchQuery.trim()) {
+      return `검색 결과 (${baseCount})`;
+    }
+
+    switch (activeTab) {
+      case 'district':
+        return `${user?.district || '우리 지역'} 팀들 (${baseCount})`;
+      case 'city':
+        return `${user?.city || '우리 지역'} 팀들 (${baseCount})`;
+      default:
+        return `팀들 (${baseCount})`;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* 헤더 */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">팀 관리</h1>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-          >
-            새 팀 만들기
-          </button>
-        </div>
-
-        {/* 필터 */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                스포츠
-              </label>
-              <select
-                value={selectedSport}
-                onChange={(e) => setSelectedSport(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="축구">축구</option>
-                <option value="풋살">풋살</option>
-              </select>
+              <h1 className="text-3xl font-bold text-gray-900">팀 관리</h1>
+              <p className="text-gray-600 mt-2">{user.currentSport} 팀 찾기</p>
+              <div className="flex items-center space-x-2 mt-2">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  📍 {user.city} {user.district}
+                </span>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                지역
-              </label>
-              <select
-                value={selectedCity}
-                onChange={(e) => {
-                  setSelectedCity(e.target.value);
-                  setSelectedDistrict(''); // 지역 변경 시 구 초기화
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="서울">서울</option>
-                <option value="경기도">경기도</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                구/시
-              </label>
-              <select
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">전체</option>
-                {selectedCity === '서울' && (
-                  <>
-                    <option value="강남구">강남구</option>
-                    <option value="강동구">강동구</option>
-                    <option value="강서구">강서구</option>
-                    <option value="관악구">관악구</option>
-                    <option value="송파구">송파구</option>
-                    <option value="서초구">서초구</option>
-                    <option value="마포구">마포구</option>
-                    <option value="용산구">용산구</option>
-                  </>
-                )}
-                {selectedCity === '경기도' && (
-                  <>
-                    <option value="수원시">수원시</option>
-                    <option value="성남시">성남시</option>
-                    <option value="고양시">고양시</option>
-                    <option value="용인시">용인시</option>
-                    <option value="부천시">부천시</option>
-                    <option value="안양시">안양시</option>
-                    <option value="안산시">안산시</option>
-                    <option value="화성시">화성시</option>
-                  </>
-                )}
-              </select>
-            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors whitespace-nowrap self-start md:self-auto"
+            >
+              새 팀 만들기
+            </button>
           </div>
         </div>
 
@@ -222,14 +223,75 @@ export default function TeamsPage() {
               </div>
             )}
 
+            {/* 탭과 검색 */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="border-b border-gray-200 flex-1">
+                  <nav className="-mb-px flex space-x-8">
+                    <button
+                      onClick={() => setActiveTab('district')}
+                      className={`${
+                        activeTab === 'district'
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                    >
+                      {user.district}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('city')}
+                      className={`${
+                        activeTab === 'city'
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                    >
+                      {user.city}
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              {/* 검색바 */}
+              <div className="max-w-md">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="팀 이름으로 검색..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        // 엔터키로도 검색 가능 (이미 실시간 검색 중)
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      // 실시간 검색이 이미 작동 중이므로 포커스만 이동
+                      const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+                      input?.focus();
+                    }}
+                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>검색</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* 다른 팀들 */}
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                {selectedCity} {selectedSport} 팀들 ({teams.length}개)
+                {getCurrentTitle()}
               </h2>
-              {teams.length > 0 ? (
+              {getCurrentTeams().length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {teams.map((team) => (
+                  {getCurrentTeams().map((team) => (
                     <TeamCard key={team.id} team={team} isMyTeam={false} user={user} />
                   ))}
                 </div>
@@ -251,10 +313,11 @@ export default function TeamsPage() {
         {/* 팀 생성 모달 */}
         {showCreateModal && (
           <CreateTeamModal
+            user={user}
             onClose={() => setShowCreateModal(false)}
             onSuccess={() => {
               setShowCreateModal(false);
-              loadTeams();
+              loadAllTeams();
             }}
           />
         )}
@@ -374,21 +437,16 @@ function TeamCard({ team, isMyTeam, user }: { team: Team; isMyTeam: boolean; use
 }
 
 // 팀 생성 모달 컴포넌트
-function CreateTeamModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function CreateTeamModal({ user, onClose, onSuccess }: { user: any; onClose: () => void; onSuccess: () => void }) {
   const [formData, setFormData] = useState({
     name: '',
-    sport: '축구',
-    city: '서울',
-    district: '',
+    sport: user?.currentSport || '축구',
+    city: user?.city || '서울',
+    district: user?.district || '',
     description: '',
     maxMembers: 20
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const districts = {
-    '서울': ['강남구', '강동구', '강서구', '관악구', '송파구', '서초구', '마포구', '용산구'],
-    '경기도': ['수원시', '성남시', '고양시', '용인시', '부천시', '안양시', '안산시', '화성시']
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -439,14 +497,12 @@ function CreateTeamModal({ onClose, onSuccess }: { onClose: () => void; onSucces
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">스포츠</label>
-              <select
+              <input
+                type="text"
                 value={formData.sport}
-                onChange={(e) => setFormData(prev => ({ ...prev, sport: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="축구">축구</option>
-                <option value="풋살">풋살</option>
-              </select>
+                disabled
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
             </div>
 
             <div>
@@ -465,29 +521,22 @@ function CreateTeamModal({ onClose, onSuccess }: { onClose: () => void; onSucces
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">지역</label>
-              <select
+              <input
+                type="text"
                 value={formData.city}
-                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value, district: '' }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="서울">서울</option>
-                <option value="경기도">경기도</option>
-              </select>
+                disabled
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">구/시</label>
-              <select
+              <input
+                type="text"
                 value={formData.district}
-                onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">선택하세요</option>
-                {districts[formData.city as keyof typeof districts]?.map(district => (
-                  <option key={district} value={district}>{district}</option>
-                ))}
-              </select>
+                disabled
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
             </div>
           </div>
 

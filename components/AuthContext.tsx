@@ -30,14 +30,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 로컬스토리지에서 인증 정보 복원
+    // 컴포넌트 마운트 시 로컬스토리지에서 인증 정보 복원 및 최신 정보 가져오기
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('token');
 
     if (storedUser && storedToken) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
         setToken(storedToken);
+
+        // 최신 사용자 정보를 서버에서 가져오기
+        fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${storedToken}`
+          }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.user) {
+              setUser(data.user);
+              localStorage.setItem('user', JSON.stringify(data.user));
+            }
+          })
+          .catch(error => {
+            console.error('Failed to fetch user info:', error);
+          });
       } catch (error) {
         // 파싱 오류 시 로컬스토리지 정리
         localStorage.removeItem('user');

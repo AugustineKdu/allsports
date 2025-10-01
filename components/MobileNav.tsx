@@ -12,10 +12,10 @@ export default function MobileNav() {
   if (!user) return null;
 
   const navItems = [
-    { href: '/', icon: '🏠', label: '홈' },
-    { href: '/teams', icon: '👥', label: '팀' },
-    { href: '/matches', icon: '⚽', label: '시합' },
-    { href: '/rankings', icon: '🏆', label: '랭크' },
+    { href: '/', label: '홈' },
+    { href: '/teams', label: '팀' },
+    { href: '/matches', label: '시합' },
+    { href: '/rankings', label: '랭킹' },
   ];
 
   return (
@@ -27,14 +27,13 @@ export default function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+              className={`flex items-center justify-center transition-colors ${
                 isActive
-                  ? 'text-blue-600 bg-blue-50'
+                  ? 'text-blue-600 bg-blue-50 font-bold'
                   : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
               }`}
             >
-              <span className="text-2xl">{item.icon}</span>
-              <span className="text-xs font-medium">{item.label}</span>
+              <span className="text-sm font-medium">{item.label}</span>
             </Link>
           );
         })}

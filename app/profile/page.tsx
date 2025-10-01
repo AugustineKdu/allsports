@@ -197,7 +197,15 @@ export default function ProfilePage() {
                       </label>
                       <select
                         value={formData.city}
-                        onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value, district: '' }))}
+                        onChange={(e) => {
+                          const newCity = e.target.value;
+                          // 지역이 실제로 변경되었을 때만 district 초기화
+                          if (newCity !== formData.city) {
+                            setFormData(prev => ({ ...prev, city: newCity, district: '' }));
+                          } else {
+                            setFormData(prev => ({ ...prev, city: newCity }));
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="서울">서울</option>
@@ -264,8 +272,12 @@ export default function ProfilePage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">지역</label>
-                      <p className="mt-1 text-sm text-gray-900">{user.city} {user.district}</p>
+                      <label className="block text-sm font-medium text-gray-700">시/도</label>
+                      <p className="mt-1 text-sm text-gray-900">{user.city}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">구/시</label>
+                      <p className="mt-1 text-sm text-gray-900">{user.district}</p>
                     </div>
                   </div>
 

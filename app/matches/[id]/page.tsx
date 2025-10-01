@@ -285,71 +285,102 @@ export default function MatchDetailPage() {
               </div>
             </div>
 
-            {/* 헤더 액션 버튼들 */}
-            <div className="flex space-x-2">
-              {canConfirmMatch() && (
-                <button
-                  onClick={handleConfirmMatch}
-                  disabled={isUpdating}
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
-                >
-                  ✅ {isUpdating ? '처리 중...' : '경기 수락'}
-                </button>
-              )}
-
-              {canInputResult() && (
-                <button
-                  onClick={() => setShowResultModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
-                >
-                  📝 결과 입력
-                </button>
-              )}
-
-              {canCancelMatch() && (
-                <button
-                  onClick={handleCancelMatch}
-                  disabled={isUpdating}
-                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
-                >
-                  ❌ {isUpdating ? '처리 중...' : '경기 거절'}
-                </button>
-              )}
-            </div>
           </div>
         </div>
 
         {/* 액션 알림 배너 */}
         {match.status === 'proposed' && canConfirmMatch() && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8 rounded-r-lg">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <svg className="h-6 w-6 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-yellow-800">시합 요청 대기 중</h3>
+                  <h3 className="text-base font-semibold text-yellow-800">⚡ 시합 요청 대기 중</h3>
                   <p className="text-sm text-yellow-700 mt-1">
-                    {match.creator.username}님이 시합을 제안했습니다. 수락하거나 거절해주세요.
+                    <span className="font-medium">{match.creator.username}</span>님이 시합을 제안했습니다. 수락 또는 거절해주세요.
                   </p>
                 </div>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-3 ml-9 md:ml-0">
                 <button
                   onClick={handleConfirmMatch}
                   disabled={isUpdating}
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                  className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
                 >
-                  수락
+                  {isUpdating ? '처리 중...' : '✅ 수락'}
                 </button>
                 <button
                   onClick={handleCancelMatch}
                   disabled={isUpdating}
-                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                  className="flex-1 md:flex-none bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
                 >
-                  거절
+                  {isUpdating ? '처리 중...' : '❌ 거절'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 결과 입력 배너 */}
+        {match.status === 'confirmed' && canInputResult() && (
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-6 mb-8 rounded-r-lg">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                    <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-base font-semibold text-blue-800">📝 경기 결과 입력</h3>
+                  <p className="text-sm text-blue-700 mt-1">
+                    경기가 확정되었습니다. 경기 종료 후 결과를 입력해주세요.
+                  </p>
+                </div>
+              </div>
+              <div className="ml-9 md:ml-0">
+                <button
+                  onClick={() => setShowResultModal(true)}
+                  className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                >
+                  결과 입력하기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 취소 가능 배너 (제안자인 경우) */}
+        {(match.status === 'proposed' || match.status === 'confirmed') && !canConfirmMatch() && canCancelMatch() && (
+          <div className="bg-gray-50 border-l-4 border-gray-400 p-6 mb-8 rounded-r-lg">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-base font-semibold text-gray-800">⏳ {match.status === 'proposed' ? '상대팀 응답 대기 중' : '경기 확정됨'}</h3>
+                  <p className="text-sm text-gray-700 mt-1">
+                    {match.status === 'proposed'
+                      ? '상대팀이 수락하면 경기가 확정됩니다.'
+                      : '경기가 진행되면 결과를 입력할 수 있습니다.'}
+                  </p>
+                </div>
+              </div>
+              <div className="ml-9 md:ml-0">
+                <button
+                  onClick={handleCancelMatch}
+                  disabled={isUpdating}
+                  className="w-full md:w-auto bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                >
+                  {isUpdating ? '처리 중...' : '경기 취소하기'}
                 </button>
               </div>
             </div>

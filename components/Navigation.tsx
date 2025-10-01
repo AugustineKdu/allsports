@@ -33,13 +33,13 @@ export default function Navigation() {
                 href="/teams"
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                팀 관리
+                팀
               </Link>
               <Link
                 href="/matches"
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                시합 관리
+                시합
               </Link>
               <Link
                 href="/rankings"
@@ -56,26 +56,29 @@ export default function Navigation() {
               <div className="relative">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
-                        {user.username.charAt(0)}
-                      </span>
-                    </div>
-                    <span className="hidden md:block text-gray-700 font-medium">
+                  <div className="text-left hidden md:block">
+                    <div className="text-sm font-semibold text-gray-900">
                       {user.username}
-                    </span>
-                    <svg
-                      className="w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {user.city} {user.district} · {user.currentSport}
+                    </div>
                   </div>
+                  <div className="text-left md:hidden">
+                    <div className="text-sm font-semibold text-gray-900">
+                      {user.username}
+                    </div>
+                  </div>
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
 
                 {/* 드롭다운 메뉴 */}

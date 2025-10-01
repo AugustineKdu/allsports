@@ -11,15 +11,21 @@ interface Team {
   sport: string;
   city: string;
   district: string;
+  owner?: {
+    id: string;
+    username: string;
+  };
 }
 
 export default function CreateMatchPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [availableTeams, setAvailableTeams] = useState<Team[]>([]);
+  const [myTeams, setMyTeams] = useState<Team[]>([]);
+  const [awayTeams, setAwayTeams] = useState<Team[]>([]);
+  const [awayTeamSearchQuery, setAwayTeamSearchQuery] = useState('');
   const [formData, setFormData] = useState({
-    sport: '축구',
+    sport: '',
     homeTeamId: '',
     awayTeamId: '',
     matchDate: '',
@@ -34,19 +40,43 @@ export default function CreateMatchPage() {
       router.push('/login');
       return;
     }
-    loadAvailableTeams();
-  }, [user, formData.sport]);
+    // user의 currentSport로 초기화
+    setFormData(prev => ({ ...prev, sport: user.currentSport }));
+    loadMyTeams();
+    loadAwayTeams();
+  }, [user]);
 
-  const loadAvailableTeams = async () => {
+  const loadMyTeams = async () => {
+    if (!user) return;
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/teams?sport=${formData.sport}`, {
+      const response = await fetch(`/api/teams?sport=${user.currentSport}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
       if (response.ok) {
         const teams = await response.json();
-        setAvailableTeams(teams);
+        // 내가 오너인 팀만 필터링
+        const ownerTeams = teams.filter((team: Team) => team.owner?.id === user.id);
+        setMyTeams(ownerTeams);
+      }
+    } catch (error) {
+      console.error('내 팀 목록 로드 실패:', error);
+    }
+  };
+
+  const loadAwayTeams = async () => {
+    if (!user) return;
+    try {
+      const token = localStorage.getItem('token');
+      // 전국 모든 팀 로드
+      const response = await fetch(`/api/teams?sport=${user.currentSport}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const teams = await response.json();
+        setAwayTeams(teams);
       }
     } catch (error) {
       console.error('팀 목록 로드 실패:', error);
@@ -119,6 +149,21 @@ export default function CreateMatchPage() {
     return `${team.name} (${team.city} ${team.district})`;
   };
 
+  // 원정팀 검색 필터링
+  const getFilteredAwayTeams = () => {
+    let filtered = awayTeams.filter(team => team.id !== formData.homeTeamId);
+
+    if (awayTeamSearchQuery.trim()) {
+      filtered = filtered.filter(team =>
+        team.name.toLowerCase().includes(awayTeamSearchQuery.toLowerCase()) ||
+        team.city.toLowerCase().includes(awayTeamSearchQuery.toLowerCase()) ||
+        team.district.toLowerCase().includes(awayTeamSearchQuery.toLowerCase())
+      );
+    }
+
+    return filtered;
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -147,32 +192,25 @@ export default function CreateMatchPage() {
         {/* 경기 생성 폼 */}
         <div className="bg-white rounded-lg shadow p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 스포츠 선택 */}
+            {/* 스포츠 선택 (고정) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                종목 *
+                종목
               </label>
-              <select
-                value={formData.sport}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  sport: e.target.value,
-                  homeTeamId: '',
-                  awayTeamId: ''
-                }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="축구">축구</option>
-                <option value="풋살">풋살</option>
-              </select>
+              <input
+                type="text"
+                value={formData.sport || user.currentSport}
+                disabled
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
+              <p className="mt-1 text-xs text-gray-500">회원님의 선호 종목으로 고정됩니다</p>
             </div>
 
             {/* 팀 선택 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  홈팀 *
+                  홈팀 (내 팀) *
                 </label>
                 <select
                   value={formData.homeTeamId}
@@ -180,34 +218,49 @@ export default function CreateMatchPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">홈팀을 선택하세요</option>
-                  {availableTeams.map((team) => (
+                  <option value="">내 팀을 선택하세요</option>
+                  {myTeams.map((team) => (
                     <option key={team.id} value={team.id}>
                       {getTeamDisplayName(team)}
                     </option>
                   ))}
                 </select>
+                {myTeams.length === 0 && (
+                  <p className="mt-1 text-xs text-red-500">
+                    소유한 팀이 없습니다. <Link href="/teams" className="text-blue-600 hover:underline">팀을 만들어보세요</Link>
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   원정팀 *
                 </label>
+                {/* 검색 input */}
+                <input
+                  type="text"
+                  value={awayTeamSearchQuery}
+                  onChange={(e) => setAwayTeamSearchQuery(e.target.value)}
+                  placeholder="팀 이름 또는 지역으로 검색..."
+                  className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
                 <select
                   value={formData.awayTeamId}
                   onChange={(e) => setFormData(prev => ({ ...prev, awayTeamId: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                  size={5}
                 >
                   <option value="">원정팀을 선택하세요</option>
-                  {availableTeams
-                    .filter(team => team.id !== formData.homeTeamId)
-                    .map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {getTeamDisplayName(team)}
-                      </option>
-                    ))}
+                  {getFilteredAwayTeams().map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {getTeamDisplayName(team)}
+                    </option>
+                  ))}
                 </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  {getFilteredAwayTeams().length}개의 팀 검색됨
+                </p>
               </div>
             </div>
 
