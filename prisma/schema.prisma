@@ -17,7 +17,9 @@ model User {
   currentSport  String   @default("축구") @map("current_sport")
   city          String   @default("서울")
   district      String?
+  prismBalance  Int      @default(0) @map("prism_balance") // Prism 포인트 잔액
   lastActiveAt  DateTime @default(now()) @map("last_active_at")
+  lastCheckIn   DateTime? @map("last_check_in") // 마지막 출석체크 날짜
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -28,6 +30,8 @@ model User {
   handledRequests  TeamJoinRequest[] @relation("JoinRequestHandler")
   createdMatches   Match[]           @relation("MatchCreator")
   disputes         Dispute[]
+  userMissions     UserMission[]
+  prismTransactions PrismTransaction[]
 
   @@map("users")
 }
@@ -149,4 +153,53 @@ model Region {
 
   @@unique([city, district])
   @@map("regions")
+}
+
+model Mission {
+  id          String   @id @default(uuid())
+  type        String   @unique // SPORT_SELECT, TEAM_JOIN, INVITE_MEMBER, MATCH_VERIFY, DAILY_CHECK_IN, TEAM_MATCH
+  title       String
+  description String
+  reward      Int      // Prism 포인트 보상
+  isRepeatable Boolean @default(false) @map("is_repeatable") // 반복 가능 여부 (출석체크 등)
+  isActive    Boolean  @default(true) @map("is_active")
+  order       Int      @default(0)    // 미션 표시 순서
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  userMissions UserMission[]
+
+  @@map("missions")
+}
+
+model UserMission {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  missionId   String    @map("mission_id")
+  status      String    @default("pending") // pending, completed
+  completedAt DateTime? @map("completed_at")
+  count       Int       @default(0) // 반복 미션의 경우 완료 횟수
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
+  @@map("user_missions")
+}
+
+model PrismTransaction {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  amount      Int      // 양수: 적립, 음수: 사용
+  type        String   // MISSION_REWARD, BOOKING_PAYMENT, etc.
+  description String
+  missionType String?  @map("mission_type") // 미션으로 인한 적립의 경우 미션 타입
+  balanceAfter Int     @map("balance_after") // 거래 후 잔액
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("prism_transactions")
 }

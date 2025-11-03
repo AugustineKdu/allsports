@@ -7,8 +7,31 @@ import { useAuth } from './AuthContext';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [prismBalance, setPrismBalance] = useState<number>(0);
   const router = useRouter();
   const { user, logout } = useAuth();
+
+  // Prism 포인트 조회
+  useEffect(() => {
+    if (user) {
+      fetchPrismBalance();
+    }
+  }, [user]);
+
+  const fetchPrismBalance = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/prism/balance', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPrismBalance(data.prismBalance);
+      }
+    } catch (error) {
+      console.error('Failed to fetch prism balance:', error);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -47,47 +70,76 @@ export default function Navigation() {
               >
                 Rankings
               </Link>
+              <Link
+                href="/missions"
+                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Missions
+              </Link>
             </div>
           </div>
 
           {/* 사용자 메뉴 */}
           <div className="flex items-center">
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              <div className="flex items-center gap-3">
+                {/* Prism 포인트 표시 */}
+                <Link
+                  href="/missions"
+                  className="hidden md:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
                 >
-                  <div className="text-left hidden md:block">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {user.username}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {user.city} {user.district} · {user.currentSport}
-                    </div>
-                  </div>
-                  <div className="text-left md:hidden">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {user.username}
-                    </div>
-                  </div>
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <span className="text-lg">💎</span>
+                  <span className="font-bold">{prismBalance.toLocaleString()}</span>
+                </Link>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+                    <div className="text-left hidden md:block">
+                      <div className="text-sm font-semibold text-gray-900">
+                        {user.username}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {user.city} {user.district} · {user.currentSport}
+                      </div>
+                    </div>
+                    <div className="text-left md:hidden">
+                      <div className="text-sm font-semibold text-gray-900">
+                        {user.username}
+                      </div>
+                    </div>
+                    <svg
+                      className="w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
 
                 {/* 드롭다운 메뉴 */}
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                    <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                    <div className="px-4 py-3 text-sm text-gray-500 border-b border-gray-100">
                       <p className="font-medium text-gray-900">{user.username}</p>
                       <p className="text-xs">{user.city} {user.district}</p>
                       <p className="text-xs">Sport: {user.currentSport}</p>
+
+                      {/* Prism 포인트 (모바일/드롭다운) */}
+                      <Link
+                        href="/missions"
+                        className="mt-2 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span className="text-xs font-medium">My Prism</span>
+                        <span className="flex items-center gap-1">
+                          <span>💎</span>
+                          <span className="font-bold">{prismBalance.toLocaleString()}</span>
+                        </span>
+                      </Link>
                     </div>
 
                     <Link
@@ -116,6 +168,7 @@ export default function Navigation() {
                     </button>
                   </div>
                 )}
+                </div>
               </div>
             ) : (
               <div className="flex items-center space-x-4">

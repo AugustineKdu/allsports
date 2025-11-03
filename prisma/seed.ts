@@ -103,10 +103,72 @@ async function main() {
     }
   });
 
+  // 미션 데이터 생성
+  const missions = [
+    {
+      type: 'SPORT_SELECT',
+      title: '좋아하는 스포츠 선택',
+      description: 'UI 상 다양한 종목 중 선택 (현재는 풋살만 활성화)',
+      reward: 300,
+      isRepeatable: false,
+      order: 1
+    },
+    {
+      type: 'TEAM_JOIN',
+      title: '팀 등록 / 참여',
+      description: '팀 만들기 또는 팀 합류 시 보상',
+      reward: 500,
+      isRepeatable: false,
+      order: 2
+    },
+    {
+      type: 'INVITE_MEMBER',
+      title: '팀원 초대',
+      description: '친구 또는 동료 초대 시 보상',
+      reward: 200,
+      isRepeatable: true,
+      order: 3
+    },
+    {
+      type: 'MATCH_VERIFY',
+      title: '경기 인증',
+      description: '경기 후 간단 인증 (사진 업로드 등)',
+      reward: 800,
+      isRepeatable: true,
+      order: 4
+    },
+    {
+      type: 'DAILY_CHECK_IN',
+      title: '출석체크',
+      description: '일일 로그인 시 자동 보상',
+      reward: 50,
+      isRepeatable: true,
+      order: 5
+    },
+    {
+      type: 'TEAM_MATCH',
+      title: '팀 미션',
+      description: '소속 팀이 다른 팀과 경기 등록 시',
+      reward: 1000,
+      isRepeatable: true,
+      order: 6
+    }
+  ];
+
+  console.log(`🎯 Creating ${missions.length} missions...`);
+  for (const mission of missions) {
+    await prisma.mission.upsert({
+      where: { type: mission.type },
+      update: mission,
+      create: mission
+    });
+  }
+
   console.log('✅ Clean seed completed successfully!');
   console.log('👤 Only essential data created:');
   console.log(`   📍 ${regions.length} regions (서울, 경기도, 인천, 부산)`);
   console.log('   🔐 admin@allsports.com / admin123 (관리자)');
+  console.log(`   🎯 ${missions.length} missions`);
   console.log('');
   console.log('🎯 Ready for production - no dummy data!');
   console.log('📝 Users can now register and create their own teams/matches');

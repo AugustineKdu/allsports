@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserFromToken } from '@/lib/auth';
+import { completeMissionInTransaction } from '@/lib/missionUtils';
 
 // 시합 목록 조회
 export async function GET(request: NextRequest) {
@@ -109,23 +110,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const match = await prisma.match.create({
-      data: {
-        sport: homeTeam.sport,
-        homeTeamId,
-        awayTeamId,
-        matchDate: new Date(matchDate),
-        matchTime,
-        location,
-        contactInfo,
-        message,
-        status: 'proposed',
-        createdBy: user.id
-      },
-      include: {
-        homeTeam: true,
-        awayTeam: true
-      }
+    // 경기 생성 및 미션 완료 처리
+    const match = await prisma.$transaction(async (tx: any) => {
+      const newMatch = await tx.match.create({
+        data: {
+          sport: homeTeam.sport,
+          homeTeamId,
+          awayTeamId,
+          matchDate: new Date(matchDate),
+          matchTime,
+          location,
+          contactInfo,
+          message,
+          status: 'proposed',
+          createdBy: user.id
+        },
+        include: {
+          homeTeam: true,
+          awayTeam: true
+        }
+      });
+
+      // 팀 미션 완료 (경기 생성자에게)
+      await completeMissionInTransaction(tx, user.id, 'TEAM_MATCH');
+
+      return newMatch;
     });
 
     return NextResponse.json(match);

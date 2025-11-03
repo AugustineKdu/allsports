@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserFromToken } from '@/lib/auth';
 import { normalizeTeamName } from '@/lib/utils';
+import { completeMissionInTransaction } from '@/lib/missionUtils';
 
 // 팀 목록 조회
 export async function GET(request: NextRequest) {
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 트랜잭션으로 팀 생성 + 멤버 추가
+    // 트랜잭션으로 팀 생성 + 멤버 추가 + 미션 완료
     const team = await prisma.$transaction(async (tx: any) => {
       // 팀 생성
       const newTeam = await tx.team.create({
@@ -134,6 +135,9 @@ export async function POST(request: NextRequest) {
           approvedAt: new Date()
         }
       });
+
+      // 팀 등록/참여 미션 완료
+      await completeMissionInTransaction(tx, user.id, 'TEAM_JOIN');
 
       return newTeam;
     });

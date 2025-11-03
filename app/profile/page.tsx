@@ -11,11 +11,27 @@ interface ProfileStats {
   mvpCount: number;
 }
 
+interface PrismTransaction {
+  id: string;
+  amount: number;
+  type: string;
+  description: string;
+  balanceAfter: number;
+  createdAt: string;
+}
+
 export default function ProfilePage() {
   const { user, logout, setUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [prismBalance, setPrismBalance] = useState<number>(0);
+  const [transactions, setTransactions] = useState<PrismTransaction[]>([]);
+  const [transactionStats, setTransactionStats] = useState<{
+    totalEarned: number;
+    totalSpent: number;
+    currentBalance: number;
+  } | null>(null);
   const [formData, setFormData] = useState({
     username: '',
     contact: '',
@@ -40,6 +56,7 @@ export default function ProfilePage() {
         district: user.district || ''
       });
       loadStats();
+      loadPrismData();
     }
   }, [user]);
 
@@ -56,6 +73,33 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error('통계 로드 실패:', error);
+    }
+  };
+
+  const loadPrismData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      // Prism 잔액 조회
+      const balanceResponse = await fetch('/api/prism/balance', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (balanceResponse.ok) {
+        const balanceData = await balanceResponse.json();
+        setPrismBalance(balanceData.prismBalance);
+      }
+
+      // 거래 내역 조회 (최근 10개)
+      const transactionsResponse = await fetch('/api/prism/transactions?limit=10', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (transactionsResponse.ok) {
+        const transactionsData = await transactionsResponse.json();
+        setTransactions(transactionsData.transactions);
+        setTransactionStats(transactionsData.stats);
+      }
+    } catch (error) {
+      console.error('Prism 데이터 로드 실패:', error);
     }
   };
 
@@ -319,6 +363,87 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
+
+            {/* Prism 포인트 통계 */}
+            <div className="bg-white rounded-lg shadow p-6 mt-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">Prism 포인트</h2>
+                <Link
+                  href="/missions"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  미션 보기 →
+                </Link>
+              </div>
+              {transactionStats ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        💎 {transactionStats.currentBalance.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">현재 잔액</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-lg font-bold text-green-600">
+                        +{transactionStats.totalEarned.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">총 적립</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                      <div className="text-lg font-bold text-red-600">
+                        -{transactionStats.totalSpent.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">총 사용</div>
+                    </div>
+                  </div>
+
+                  {/* 최근 거래 내역 */}
+                  {transactions.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">최근 거래 내역</h3>
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {transactions.map((transaction) => (
+                          <div
+                            key={transaction.id}
+                            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900">
+                                {transaction.description}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(transaction.createdAt).toLocaleDateString('ko-KR', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                            <div className="text-right ml-4">
+                              <p className={`text-sm font-bold ${
+                                transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                잔액: {transaction.balanceAfter.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex justify-center items-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 사이드바 */}
@@ -335,10 +460,34 @@ export default function ProfilePage() {
               <p className="text-sm text-blue-600 font-medium mt-1">{user.currentSport}</p>
             </div>
 
+            {/* Prism 포인트 카드 */}
+            <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Prism 포인트</h3>
+                <span className="text-2xl">💎</span>
+              </div>
+              <div className="text-3xl font-bold mb-2">
+                {prismBalance.toLocaleString()}
+              </div>
+              <p className="text-sm text-blue-100 mb-4">현재 잔액</p>
+              <Link
+                href="/missions"
+                className="block w-full text-center bg-white text-blue-600 py-2 px-4 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+              >
+                미션 보기
+              </Link>
+            </div>
+
             {/* 빠른 메뉴 */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">빠른 메뉴</h3>
               <div className="space-y-2">
+                <Link
+                  href="/missions"
+                  className="block w-full text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-md font-medium"
+                >
+                  💎 미션 & 포인트
+                </Link>
                 <Link
                   href="/teams"
                   className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"

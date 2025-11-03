@@ -315,6 +315,89 @@ export default function HomePage() {
               </div>
             )}
 
+            {/* Prism 포인트 소개 섹션 */}
+            <div className="mb-12 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-2xl overflow-hidden shadow-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                {/* 왼쪽: Prism 소개 */}
+                <div className="p-8 md:p-10 text-white">
+                  <div className="inline-block bg-yellow-400 text-purple-900 px-3 py-1 rounded-full text-xs font-bold mb-4">
+                    NEW FEATURE
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4 break-keep">
+                    💎 Prism 포인트
+                  </h2>
+                  <p className="text-lg md:text-xl text-purple-100 mb-6 break-keep">
+                    경기하고, 팀 활동하고, 포인트 받으세요!
+                  </p>
+                  <p className="text-base text-purple-100 mb-6 break-keep leading-relaxed">
+                    AllSports와 함께하면 단순히 경기만 하는 것이 아닙니다.
+                    팀을 만들고, 경기를 하고, 친구를 초대하는 모든 활동이
+                    <span className="font-bold text-yellow-300"> Prism 포인트</span>로 적립됩니다.
+                  </p>
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center space-x-3 text-purple-100">
+                      <span className="text-xl">✨</span>
+                      <span className="text-sm">경기장 예약 비용 할인</span>
+                    </div>
+                    <div className="flex items-center space-x-3 text-purple-100">
+                      <span className="text-xl">⚽</span>
+                      <span className="text-sm">스포츠 용품 구매 할인</span>
+                    </div>
+                    <div className="flex items-center space-x-3 text-purple-100">
+                      <span className="text-xl">🎁</span>
+                      <span className="text-sm">다양한 경품 및 혜택</span>
+                    </div>
+                  </div>
+                  <Link
+                    href={user ? "/missions" : "/prism"}
+                    className="inline-block bg-yellow-400 text-purple-900 px-6 py-3 rounded-xl font-bold hover:bg-yellow-300 transition-all hover:scale-105 shadow-lg"
+                  >
+                    {user ? "내 미션 보기 →" : "자세히 알아보기 →"}
+                  </Link>
+                </div>
+
+                {/* 오른쪽: 미션 예시 */}
+                <div className="bg-white/10 backdrop-blur-sm p-8 md:p-10">
+                  <h3 className="text-xl font-bold text-white mb-6">포인트 적립 방법</h3>
+                  <div className="space-y-4">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition-colors">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-white font-semibold text-sm">🎉 회원가입</span>
+                        <span className="text-yellow-300 font-bold">+300P</span>
+                      </div>
+                      <p className="text-xs text-purple-100">첫 가입만 해도 포인트 지급!</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition-colors">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-white font-semibold text-sm">👥 팀 만들기/가입</span>
+                        <span className="text-yellow-300 font-bold">+500P</span>
+                      </div>
+                      <p className="text-xs text-purple-100">팀을 만들거나 가입하면 보상</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition-colors">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-white font-semibold text-sm">⚽ 경기 등록</span>
+                        <span className="text-yellow-300 font-bold">+1,000P</span>
+                      </div>
+                      <p className="text-xs text-purple-100">경기를 진행할 때마다 적립</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition-colors">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-white font-semibold text-sm">✅ 매일 출석</span>
+                        <span className="text-yellow-300 font-bold">+50P</span>
+                      </div>
+                      <p className="text-xs text-purple-100">로그인만 해도 매일 적립</p>
+                    </div>
+                  </div>
+                  <div className="mt-6 pt-6 border-t border-white/20">
+                    <p className="text-xs text-purple-200 text-center break-keep">
+                      💡 포인트는 경기장 예약, 용품 구매 등<br />다양한 곳에서 사용 가능합니다
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* 빠른 메뉴 */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Link href={user ? "/teams" : "/register"} className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
@@ -334,10 +417,10 @@ export default function HomePage() {
                 <div className="font-medium text-gray-900">전국 랭킹</div>
                 <div className="text-sm text-gray-500 mt-1">지역/전국 랭킹에서 팀의 실력을 확인하고 전국 제패에 도전하세요</div>
               </Link>
-              <Link href={user ? "/profile" : "/register"} className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">🎯</div>
-                <div className="font-medium text-gray-900">성장 기록</div>
-                <div className="text-sm text-gray-500 mt-1">모든 경기와 승부를 기록으로 남겨 팀의 성장 스토리를 만들어가세요</div>
+              <Link href={user ? "/missions" : "/prism"} className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow group text-white">
+                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">💎</div>
+                <div className="font-medium">Prism 포인트</div>
+                <div className="text-sm text-purple-100 mt-1">미션 완료하고 포인트 받아서 다양한 혜택을 누리세요</div>
               </Link>
             </div>
 

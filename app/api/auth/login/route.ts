@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { comparePassword, generateToken } from '@/lib/auth';
+import { completeMission } from '@/lib/missionUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Password valid, generating token...');
-    
+
     // JWT 토큰 생성
     const token = generateToken({
       userId: user.id,
@@ -46,8 +47,14 @@ export async function POST(request: NextRequest) {
       isAdmin: user.isAdmin
     });
 
+    // 로그인 시 미션 자동 완료 (백그라운드로 실행)
+    // 출석체크 미션만 처리 (스포츠 선택은 회원가입 시 이미 완료됨)
+    completeMission(user.id, 'DAILY_CHECK_IN').catch(err => {
+      console.error('Failed to complete daily check-in mission:', err);
+    });
+
     console.log('Login successful for:', email);
-    
+
     return NextResponse.json({
       token,
       user: {

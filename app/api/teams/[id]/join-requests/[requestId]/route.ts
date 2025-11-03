@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
+import { completeMissionInTransaction } from '@/lib/missionUtils';
 
 // 가입 신청 수락/거절
 export async function PUT(
@@ -70,15 +71,24 @@ export async function PUT(
         return NextResponse.json({ error: '팀 최대 인원을 초과했습니다' }, { status: 400 });
       }
 
-      // 가입 승인
-      await prisma.teamMember.update({
-        where: { id: params.requestId },
-        data: {
-          status: 'active',
-          role: 'member',
-          approvedBy: decoded.userId,
-          approvedAt: new Date()
-        }
+      // 가입 승인 및 미션 완료 처리
+      await prisma.$transaction(async (tx: any) => {
+        // 가입 승인
+        await tx.teamMember.update({
+          where: { id: params.requestId },
+          data: {
+            status: 'active',
+            role: 'member',
+            approvedBy: decoded.userId,
+            approvedAt: new Date()
+          }
+        });
+
+        // 팀 가입 미션 완료 (가입한 유저에게)
+        await completeMissionInTransaction(tx, joinRequest.userId, 'TEAM_JOIN');
+
+        // 팀원 초대 미션 완료 (승인한 유저에게)
+        await completeMissionInTransaction(tx, decoded.userId, 'INVITE_MEMBER');
       });
 
       return NextResponse.json({ message: '가입이 승인되었습니다' });
