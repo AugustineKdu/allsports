@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Mission {
   id: string;
@@ -93,6 +94,18 @@ export default function MissionsPage() {
       'TEAM_MATCH': '🏆'
     };
     return icons[type] || '🎯';
+  };
+
+  const getMissionGuide = (type: string) => {
+    const guides: { [key: string]: { action: string; link?: string } } = {
+      'SPORT_SELECT': { action: '회원가입 시 자동 완료' },
+      'TEAM_JOIN': { action: '팀에 가입하면 완료', link: '/teams' },
+      'INVITE_MEMBER': { action: '팀원을 초대하면 완료' },
+      'MATCH_VERIFY': { action: '경기 후 간단한 인증으로 완료' },
+      'DAILY_CHECK_IN': { action: '매일 로그인 시 완료 가능' },
+      'TEAM_MATCH': { action: '경기를 등록하면 완료', link: '/matches' }
+    };
+    return guides[type] || { action: '조건 달성 시 완료' };
   };
 
   const canCompleteMission = (mission: Mission) => {
@@ -189,9 +202,26 @@ export default function MissionsPage() {
                     </div>
                   </div>
 
-                  <p className="text-gray-600 text-sm mb-3 ml-12">
+                  <p className="text-gray-600 text-sm mb-2 ml-12">
                     {mission.description}
                   </p>
+
+                  {/* 미션 완료 가이드 */}
+                  {!mission.isCompleted && (
+                    <div className="ml-12 mb-3">
+                      <p className="text-xs text-blue-600 font-medium">
+                        💡 {getMissionGuide(mission.type).action}
+                      </p>
+                      {getMissionGuide(mission.type).link && (
+                        <Link
+                          href={getMissionGuide(mission.type).link!}
+                          className="text-xs text-blue-500 hover:underline"
+                        >
+                          → 바로가기
+                        </Link>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between ml-12">
                     <div className="flex items-center gap-4">
