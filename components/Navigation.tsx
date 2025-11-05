@@ -51,30 +51,42 @@ export default function Navigation() {
             </Link>
 
             {/* 데스크톱 메뉴 */}
-            <div className="hidden md:ml-10 md:flex md:space-x-8">
-              <Link
-                href="/teams"
-                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Teams
-              </Link>
-              <Link
-                href="/matches"
-                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Matches
-              </Link>
-              <Link
-                href="/rankings"
-                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Rankings
-              </Link>
+            <div className="hidden md:ml-10 md:flex md:space-x-6">
               <Link
                 href="/missions"
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                Missions
+                미션
+              </Link>
+              <Link
+                href="/shortcut"
+                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                숏컷
+              </Link>
+              <Link
+                href="/best-missions"
+                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                베스트미션
+              </Link>
+              <Link
+                href="/partners"
+                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                제휴
+              </Link>
+              <Link
+                href="/profile"
+                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                MY
+              </Link>
+              <Link
+                href="/more"
+                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                더보기
               </Link>
             </div>
           </div>

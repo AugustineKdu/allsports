@@ -12,16 +12,17 @@ export default function MobileNav() {
   if (!user) return null;
 
   const navItems = [
-    { href: '/', label: 'Home' },
-    { href: '/teams', label: 'Teams' },
-    { href: '/matches', label: 'Matches' },
-    { href: '/missions', label: 'Missions' },
-    { href: '/rankings', label: 'Rankings' },
+    { href: '/missions', label: '미션' },
+    { href: '/shortcut', label: '숏컷' },
+    { href: '/best-missions', label: '베스트' },
+    { href: '/partners', label: '제휴' },
+    { href: '/profile', label: 'MY' },
+    { href: '/more', label: '더보기' },
   ];
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-      <div className="grid grid-cols-5 h-16">
+      <div className="grid grid-cols-6 h-16">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
