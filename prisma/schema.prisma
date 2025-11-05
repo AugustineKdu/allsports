@@ -32,6 +32,9 @@ model User {
   disputes         Dispute[]
   userMissions     UserMission[]
   prismTransactions PrismTransaction[]
+  shortcuts        Shortcut[]
+  shortcutLikes    ShortcutLike[]
+  shortcutComments ShortcutComment[]
 
   @@map("users")
 }
@@ -161,13 +164,22 @@ model Mission {
   title       String
   description String
   reward      Int      // Prism 포인트 보상
+  category    String   @default("DAILY") // DAILY, TEAM, MATCH, SPECIAL, PARTNERSHIP
+  icon        String?  // 미션 아이콘 (예: trophy, star, users, etc.)
   isRepeatable Boolean @default(false) @map("is_repeatable") // 반복 가능 여부 (출석체크 등)
   isActive    Boolean  @default(true) @map("is_active")
+  autoVerify  Boolean  @default(false) @map("auto_verify") // 자동 검증 가능 여부
+  verificationRules Json? @map("verification_rules") // 자동 검증 규칙
   order       Int      @default(0)    // 미션 표시 순서
+  priority    Int      @default(0)    // 우선순위 (베스트미션 선정용)
+  participantCount Int @default(0) @map("participant_count") // 참여자 수
+  startDate   DateTime? @map("start_date") // 미션 시작일
+  endDate     DateTime? @map("end_date")   // 미션 종료일
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   userMissions UserMission[]
+  partnerMission PartnerMission?
 
   @@map("missions")
 }
@@ -202,4 +214,94 @@ model PrismTransaction {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("prism_transactions")
+}
+
+// 숏컷 (짧은 영상/이미지 콘텐츠)
+model Shortcut {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  title       String?
+  content     String?  // 텍스트 내용
+  mediaUrl    String?  @map("media_url") // 이미지/비디오 URL
+  mediaType   String?  @map("media_type") // image, video
+  sport       String?
+  likeCount   Int      @default(0) @map("like_count")
+  commentCount Int     @default(0) @map("comment_count")
+  viewCount   Int      @default(0) @map("view_count")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes    ShortcutLike[]
+  comments ShortcutComment[]
+
+  @@map("shortcuts")
+}
+
+// 숏컷 좋아요
+model ShortcutLike {
+  id         String   @id @default(uuid())
+  shortcutId String   @map("shortcut_id")
+  userId     String   @map("user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  shortcut Shortcut @relation(fields: [shortcutId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([shortcutId, userId])
+  @@map("shortcut_likes")
+}
+
+// 숏컷 댓글
+model ShortcutComment {
+  id         String   @id @default(uuid())
+  shortcutId String   @map("shortcut_id")
+  userId     String   @map("user_id")
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  shortcut Shortcut @relation(fields: [shortcutId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("shortcut_comments")
+}
+
+// 제휴사
+model Partner {
+  id          String   @id @default(uuid())
+  name        String
+  category    String   // CAFE, STORE, GYM, SPORTS_FACILITY, etc.
+  description String?
+  logoUrl     String?  @map("logo_url")
+  address     String?
+  city        String?
+  district    String?
+  contact     String?
+  website     String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  missions PartnerMission[]
+
+  @@map("partners")
+}
+
+// 제휴 미션
+model PartnerMission {
+  id         String   @id @default(uuid())
+  partnerId  String   @map("partner_id")
+  missionId  String   @unique @map("mission_id")
+  conditions Json?    // 제휴 미션 특별 조건
+  startDate  DateTime? @map("start_date")
+  endDate    DateTime? @map("end_date")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@map("partner_missions")
 }

@@ -31,9 +31,14 @@
       "Bash(./setup-postgres.sh:*)",
       "Bash(vercel link:*)",
       "Bash(npx prisma db seed:*)",
-      "WebFetch(domain:port-9000-allsporttesting-m10pz2kw69fd7f89.sel4.cloudtype.app)"
+      "WebFetch(domain:port-9000-allsporttesting-m10pz2kw69fd7f89.sel4.cloudtype.app)",
+      "Bash(git tag:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "model": "opus"
 }

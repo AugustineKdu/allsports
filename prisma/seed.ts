@@ -103,14 +103,22 @@ async function main() {
     }
   });
 
-  // 미션 데이터 생성
+  // 미션 데이터 생성 (자동화 및 카테고리 포함)
   const missions = [
     {
       type: 'SPORT_SELECT',
       title: '좋아하는 스포츠 선택',
       description: 'UI 상 다양한 종목 중 선택 (현재는 풋살만 활성화)',
       reward: 300,
+      category: 'DAILY',
+      icon: 'trophy',
       isRepeatable: false,
+      autoVerify: true,
+      verificationRules: {
+        type: 'AUTO_ON_SIGNUP',
+        description: '회원가입 시 자동 완료'
+      },
+      priority: 1,
       order: 1
     },
     {
@@ -118,7 +126,17 @@ async function main() {
       title: '팀 등록 / 참여',
       description: '팀 만들기 또는 팀 합류 시 보상',
       reward: 500,
+      category: 'TEAM',
+      icon: 'users',
       isRepeatable: false,
+      autoVerify: true,
+      verificationRules: {
+        type: 'CHECK_TEAM_MEMBER',
+        table: 'TeamMember',
+        condition: 'status = active',
+        description: '팀 멤버 상태가 active일 때 자동 완료'
+      },
+      priority: 2,
       order: 2
     },
     {
@@ -126,7 +144,11 @@ async function main() {
       title: '팀원 초대',
       description: '친구 또는 동료 초대 시 보상',
       reward: 200,
+      category: 'TEAM',
+      icon: 'user-plus',
       isRepeatable: true,
+      autoVerify: false,
+      priority: 3,
       order: 3
     },
     {
@@ -134,24 +156,99 @@ async function main() {
       title: '경기 인증',
       description: '경기 후 간단 인증 (사진 업로드 등)',
       reward: 800,
+      category: 'MATCH',
+      icon: 'check-circle',
       isRepeatable: true,
+      autoVerify: false,
+      priority: 5,
       order: 4
     },
     {
       type: 'DAILY_CHECK_IN',
-      title: '출석체크',
+      title: '매일 출석체크',
       description: '일일 로그인 시 자동 보상',
       reward: 50,
+      category: 'DAILY',
+      icon: 'calendar-check',
       isRepeatable: true,
+      autoVerify: true,
+      verificationRules: {
+        type: 'DAILY_CHECK',
+        cooldown: '24h',
+        description: '24시간마다 자동 체크인 가능'
+      },
+      priority: 10,
       order: 5
     },
     {
       type: 'TEAM_MATCH',
-      title: '팀 미션',
+      title: '팀 경기 참가',
       description: '소속 팀이 다른 팀과 경기 등록 시',
       reward: 1000,
+      category: 'MATCH',
+      icon: 'flag',
       isRepeatable: true,
+      autoVerify: true,
+      verificationRules: {
+        type: 'CHECK_MATCH_PARTICIPATION',
+        table: 'Match',
+        condition: 'status = confirmed OR status = completed',
+        description: '팀 경기 확정 또는 완료 시 자동 지급'
+      },
+      priority: 4,
       order: 6
+    },
+    // 새로운 미션 추가
+    {
+      type: 'FIRST_MATCH',
+      title: '첫 경기 참가',
+      description: '첫 번째 경기를 완료하면 보상 지급',
+      reward: 1500,
+      category: 'SPECIAL',
+      icon: 'star',
+      isRepeatable: false,
+      autoVerify: true,
+      verificationRules: {
+        type: 'FIRST_MATCH_COMPLETE',
+        description: '첫 경기 완료 시 자동 지급'
+      },
+      priority: 8,
+      order: 7
+    },
+    {
+      type: 'PROFILE_COMPLETE',
+      title: '프로필 완성',
+      description: '프로필 정보를 모두 입력하면 보상',
+      reward: 200,
+      category: 'DAILY',
+      icon: 'user-check',
+      isRepeatable: false,
+      autoVerify: true,
+      verificationRules: {
+        type: 'CHECK_PROFILE',
+        fields: ['username', 'contact', 'city', 'district'],
+        description: '프로필 필수 정보 입력 시 자동 완료'
+      },
+      priority: 6,
+      order: 8
+    },
+    {
+      type: 'WEEKLY_ACTIVITY',
+      title: '주간 활동 달성',
+      description: '일주일 동안 3회 이상 활동',
+      reward: 500,
+      category: 'SPECIAL',
+      icon: 'award',
+      isRepeatable: true,
+      autoVerify: true,
+      verificationRules: {
+        type: 'WEEKLY_ACTIVITY',
+        count: 3,
+        period: '7d',
+        description: '주간 3회 이상 활동 시 자동 지급'
+      },
+      priority: 7,
+      order: 9
     }
   ];
 
