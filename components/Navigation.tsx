@@ -7,31 +7,15 @@ import { useAuth } from './AuthContext';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [prismBalance, setPrismBalance] = useState<number>(0);
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, prismBalance, refreshPrismBalance } = useAuth();
 
-  // Prism 포인트 조회
+  // Prism 포인트 초기 조회
   useEffect(() => {
     if (user) {
-      fetchPrismBalance();
+      refreshPrismBalance();
     }
   }, [user]);
-
-  const fetchPrismBalance = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/prism/balance', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setPrismBalance(data.prismBalance);
-      }
-    } catch (error) {
-      console.error('Failed to fetch prism balance:', error);
-    }
-  };
 
   const handleLogout = () => {
     logout();

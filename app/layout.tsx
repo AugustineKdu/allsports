@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/components/AuthContext';
 import Navigation from '@/components/Navigation';
 import MobileNav from '@/components/MobileNav';
+import { ToastContainer } from '@/components/Toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <Navigation />
           <div className="pb-16 md:pb-0">{children}</div>
           <MobileNav />
+          <ToastContainer />
         </AuthProvider>
       </body>
     </html>

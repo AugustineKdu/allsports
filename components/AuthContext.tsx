@@ -16,9 +16,12 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  prismBalance: number;
   login: (userData: User, userToken: string) => void;
   logout: () => void;
   setUser: (userData: User) => void;
+  updatePrismBalance: (balance: number) => void;
+  refreshPrismBalance: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -27,6 +30,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [prismBalance, setPrismBalance] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -56,6 +60,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .catch(error => {
             console.error('Failed to fetch user info:', error);
           });
+
+        // Prism 잔액도 가져오기
+        fetch('/api/prism/balance', {
+          headers: {
+            'Authorization': `Bearer ${storedToken}`
+          }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.prismBalance !== undefined) {
+              setPrismBalance(data.prismBalance);
+            }
+          })
+          .catch(error => {
+            console.error('Failed to fetch prism balance:', error);
+          });
       } catch (error) {
         // 파싱 오류 시 로컬스토리지 정리
         localStorage.removeItem('user');
@@ -84,12 +104,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
+  const updatePrismBalance = (balance: number) => {
+    setPrismBalance(balance);
+  };
+
+  const refreshPrismBalance = async () => {
+    if (!token) return;
+
+    try {
+      const response = await fetch('/api/prism/balance', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPrismBalance(data.prismBalance);
+      }
+    } catch (error) {
+      console.error('Failed to fetch prism balance:', error);
+    }
+  };
+
   const value = {
     user,
     token,
+    prismBalance,
     login,
     logout,
     setUser: updateUser,
+    updatePrismBalance,
+    refreshPrismBalance,
     isLoading
   };
 

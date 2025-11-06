@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-change-in-production';
 
 // 미션 완료 조건 검증
-async function verifyMissionCondition(userId: string, missionType: string): Promise<{ success: boolean; error?: string }> {
+async function verifyMissionCondition(userId: string, missionType: string): Promise<{ success: boolean; error?: string; isDemo?: boolean; message?: string }> {
   try {
     switch (missionType) {
       case 'SPORT_SELECT':
@@ -28,63 +28,38 @@ async function verifyMissionCondition(userId: string, missionType: string): Prom
           lastCheckIn.setHours(0, 0, 0, 0);
 
           if (lastCheckIn.getTime() === today.getTime()) {
-            return { success: false, error: 'Already checked in today' };
+            return { success: false, error: '오늘은 이미 출석 체크를 완료했습니다.' };
           }
         }
         return { success: true };
 
       case 'TEAM_JOIN':
-        // 팀에 가입했는지 확인
-        const teamMembership = await prisma.teamMembership.findFirst({
-          where: {
-            userId,
-            status: 'approved'
-          }
-        });
-        if (!teamMembership) {
-          return { success: false, error: '팀에 먼저 가입해주세요' };
-        }
-        return { success: true };
+        // 팀 가입 인증 - 임시로 데모 모드에서는 성공 처리
+        return {
+          success: true,
+          isDemo: true,
+          message: '팀 가입 미션이 접수되었습니다. 정식 서비스에서는 팀 가입 확인 후 자동으로 포인트가 지급될 예정입니다.'
+        };
 
       case 'INVITE_MEMBER':
-        // 팀원을 초대했는지 확인
-        const invitation = await prisma.teamInvitation.findFirst({
-          where: {
-            inviterId: userId
-          }
-        });
-        if (!invitation) {
-          return { success: false, error: '팀원을 초대한 적이 없습니다' };
-        }
-        return { success: true };
+        // 팀원 초대 인증 - 임시로 데모 모드에서는 성공 처리
+        return {
+          success: true,
+          isDemo: true,
+          message: '팀원 초대 미션이 접수되었습니다. 정식 서비스에서는 초대 확인 후 자동으로 포인트가 지급될 예정입니다.'
+        };
 
       case 'TEAM_MATCH':
-        // 경기를 등록했는지 확인
-        const match = await prisma.match.findFirst({
-          where: {
-            OR: [
-              { creatorId: userId },
-              {
-                homeTeam: {
-                  ownerId: userId
-                }
-              },
-              {
-                awayTeam: {
-                  ownerId: userId
-                }
-              }
-            ]
-          }
-        });
-        if (!match) {
-          return { success: false, error: '경기를 먼저 등록해주세요' };
-        }
-        return { success: true };
+        // 경기 등록 인증 - 임시로 데모 모드에서는 성공 처리
+        return {
+          success: true,
+          isDemo: true,
+          message: '경기 등록 미션이 접수되었습니다. 정식 서비스에서는 경기 등록 확인 후 자동으로 포인트가 지급될 예정입니다.'
+        };
 
       case 'MATCH_VERIFY':
-        // 경기 인증 - 간단 인증으로 바로 완료 가능
-        return { success: true };
+        // AI 감지 시스템 안내 메시지 (나중에 실제 구현)
+        return { success: true, message: '경기 인증이 접수되었습니다. 추후 AI 감지 시스템을 통해 자동으로 처리될 예정입니다.' };
 
       default:
         return { success: true };
@@ -156,6 +131,20 @@ export async function POST(request: Request) {
         { error: canComplete.error || 'Mission condition not met' },
         { status: 400 }
       );
+    }
+
+    // 데모 모드 미션인 경우 (인증 시스템 필요한 미션들)
+    if (canComplete.isDemo) {
+      return NextResponse.json({
+        success: true,
+        isDemo: true,
+        message: canComplete.message,
+        mission: {
+          type: mission.type,
+          title: mission.title,
+          reward: mission.reward
+        }
+      });
     }
 
     // 트랜잭션으로 포인트 적립 및 미션 완료 처리

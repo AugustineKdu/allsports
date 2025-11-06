@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { showToast } from '@/components/Toast';
 
 interface Mission {
   id: string;
@@ -23,7 +24,7 @@ export default function MissionsPage() {
   const [prismBalance, setPrismBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [rewardAnimation, setRewardAnimation] = useState<{ show: boolean; amount: number }>({ show: false, amount: 0 });
-  const { user } = useAuth();
+  const { user, refreshPrismBalance } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -68,19 +69,53 @@ export default function MissionsPage() {
       if (response.ok) {
         const data = await response.json();
 
-        // 애니메이션 표시
-        setRewardAnimation({ show: true, amount: data.earnedPrism });
-        setTimeout(() => setRewardAnimation({ show: false, amount: 0 }), 3000);
+        // 데모 모드 미션인 경우
+        if (data.isDemo) {
+          showToast('info', data.message || '추후 인증 시스템 도입 후 포인트가 지급될 예정입니다.');
+        } else {
+          // 실제 포인트 지급된 경우
+          // 애니메이션 표시
+          setRewardAnimation({ show: true, amount: data.earnedPrism });
+          setTimeout(() => setRewardAnimation({ show: false, amount: 0 }), 3000);
 
-        // 데이터 리로드
-        loadMissions();
+          // 데이터 리로드
+          loadMissions();
+
+          // 네비게이션 바의 포인트도 업데이트
+          refreshPrismBalance();
+
+          // MATCH_VERIFY의 경우 특별한 메시지 표시
+          if (missionType === 'MATCH_VERIFY') {
+            showToast('info', '경기 인증이 접수되었습니다. 추후 AI 감지 시스템을 통해 자동으로 처리될 예정입니다.');
+          } else {
+            showToast('success', '미션을 완료했습니다!');
+          }
+        }
       } else {
         const error = await response.json();
-        alert(error.error || '미션 완료에 실패했습니다.');
+
+        // 친화적인 오류 메시지로 변환
+        let userMessage = '미션을 완료할 수 없습니다.';
+        if (error.error) {
+          if (error.error.includes('Already checked in today')) {
+            userMessage = '오늘은 이미 출석 체크를 완료했습니다. 내일 다시 시도해주세요!';
+          } else if (error.error.includes('팀에 먼저 가입')) {
+            userMessage = '팀에 먼저 가입해주세요!';
+          } else if (error.error.includes('팀원을 초대')) {
+            userMessage = '팀원을 초대한 후 완료할 수 있습니다.';
+          } else if (error.error.includes('경기를 먼저')) {
+            userMessage = '경기를 등록한 후 완료할 수 있습니다.';
+          } else if (error.error.includes('already completed')) {
+            userMessage = '이미 완료한 미션입니다.';
+          } else if (error.error.includes('Mission condition not met')) {
+            userMessage = '아직 미션 조건을 충족하지 못했습니다.';
+          }
+        }
+        showToast('info', userMessage);
       }
     } catch (error) {
       console.error('Failed to complete mission:', error);
-      alert('미션 완료에 실패했습니다.');
+      showToast('error', '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
   };
 
